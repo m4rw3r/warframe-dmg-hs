@@ -6,16 +6,17 @@ data DamageType = Impact | Puncture | Slash | Heat | Cold | Electricity | Toxic 
 data Damage = Damage Float DamageType
     deriving (Show, Eq)
 
-
-data ModValue = Capacity Float
-    | CritChance Float
-    | FireRate Float
-    | Reload Float
-    | CritMultiplier Float
-    | Status Float
-    | ElementalDamage Float DamageType
+data ModValue =
+    Accuracy Float
     | AnyDamage Float
+    | Capacity Float
+    | CritChance Float
+    | CritMultiplier Float
+    | ElementalDamage Float DamageType
+    | FireRate Float
     | Multishot Float
+    | Reload Float
+    | Status Float
         deriving (Show, Eq)
 
 type Mod = [ModValue]
@@ -34,37 +35,42 @@ data Weapon =
     }
     deriving (Show)
 
+physicalDamageTypes :: [DamageType]
 physicalDamageTypes  = [Impact, Puncture, Slash]
+elementalDamageTypes :: [DamageType]
 elementalDamageTypes = [Heat, Cold, Electricity, Toxic]
 
 applyBaseDamage :: Weapon -> [Mod] -> Weapon
-applyBaseDamage w m = w { damage = [Damage (a * d) t | Damage a t <- (damage w)] }
+applyBaseDamage w m = w { damage = [Damage (a * d) t | Damage a t <- damage w] }
     where
         d = foldr (+) 1 [a | AnyDamage a <- concat m]
 
 sumByDamageType :: [Damage] -> [Damage]
-sumByDamageType d = [Damage (foldr (+) 0 [a | Damage a b <- d, b == t]) t | t <- types]
+sumByDamageType d = [Damage (sum [a | Damage a b <- d, b == t]) t | t <- types]
     where
         types = nub [t | Damage _ t <- d]
 
 applyElementalDamage :: Weapon -> [Mod] -> Weapon
-applyElementalDamage w m = w { damage = sumByDamageType (concat [(damage w), e, p]) }
+applyElementalDamage w m = w { damage = sumByDamageType (concat [damage w, e, p]) }
     where
-        t = (foldr (+) 0 [a | Damage a _ <- damage w])
+        t = sum [a | Damage a _ <- damage w]
         -- Elemental damage is scaled to `total damage * elemental fraction`
         e = [Damage (a * t) b | ElementalDamage a b <- concat m,
-                                elem b elementalDamageTypes]
+                                b `elem` elementalDamageTypes]
         -- Only apply the physical damage enhancing mods to the base value of that
         -- damage type. They do not scale with the total damage of the weapon.
         -- They are also applied simultaneously as the elemental damages, causing
         -- them to not affect elemental damage like toxic or heat.
         p = [Damage (a * b) c | ElementalDamage a c <- concat m,
-                                Damage b c' <- damage w,
-                                elem c physicalDamageTypes,
+                                Damage b c'         <- damage w,
+                                c `elem` physicalDamageTypes,
                                 c == c']
 
+applyDamage :: Weapon -> [Mod] -> Weapon
 applyDamage w m = applyElementalDamage (applyBaseDamage w m) m
 
+lanka  :: Weapon
+vulkar :: Weapon
 lanka = Weapon {
     accuracy=1.0,
     critChance=0.25,
@@ -88,6 +94,13 @@ vulkar = Weapon {
     status=0.25
     }
 
+serration    :: Mod
+splitChamber :: Mod
+stormbringer :: Mod
+infectedClip :: Mod
+piercingHit  :: Mod
+sawtoothClip :: Mod
+rupture      :: Mod
 serration    = [AnyDamage 1.65]
 splitChamber = [Multishot 0.9]
 stormbringer = [ElementalDamage 0.9 Electricity]
@@ -96,10 +109,11 @@ piercingHit  = [ElementalDamage 0.3 Puncture]
 sawtoothClip = [ElementalDamage 0.3 Slash]
 rupture      = [ElementalDamage 0.3 Impact]
 
+mods :: [Mod]
 mods = [serration, splitChamber, stormbringer, infectedClip, rupture]
 
 main :: IO ()
-main = do print "test"
+main = print "test"
     >> print physicalDamageTypes
     >> print lanka
     >> print mods
