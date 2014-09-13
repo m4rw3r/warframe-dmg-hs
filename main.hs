@@ -1,4 +1,5 @@
 import Data.List
+import Math.Combinat.Sets (choose)
 
 data DamageType = Impact | Puncture | Slash | Heat | Cold | Electricity | Toxic | Blast | Corrosive | Gas | Magnetic | Radiation | Viral
     deriving (Eq, Ord, Enum, Read, Show, Bounded)
@@ -26,11 +27,20 @@ data Mod = Mod String [ModValue]
 instance Eq Mod where
     Mod _ v == Mod _ v2 = v == v2
 
+instance Ord Mod where
+    Mod a _ <= Mod b _ = a <= b
+
 modName :: Mod -> String
 modName (Mod n _) = n
 
 modValues :: Mod -> [ModValue]
 modValues (Mod _ v) = v
+
+modByName :: String -> [Mod] -> Maybe Mod
+modByName n = find (\x -> modName x == n)
+
+modsByNames :: [String] -> [Mod] -> [Mod]
+modsByNames n = filter (\x -> modName x `elem` n)
 
 data Weapon =
     Weapon {
@@ -113,8 +123,30 @@ critDamage w = [Damage (a * m) t | Damage a t <- damage w]
     where
         m = critMultiplier w
 
+-- Incorrect, the status-chance is a weighted distribution depending on the total damage
 averageStatusDamage :: Weapon -> Float
-averageStatusDamage w = sum [a * 2 | Damage a _ <- damage w] / fromIntegral (length (damage w))
+averageStatusDamage w = sum [a * 2 | Damage a _ <- damage w] / fromIntegral (length $ damage w)
+
+averageShotDamage :: Weapon -> [Damage]
+averageShotDamage w = [Damage (a * m * c * s) t | Damage a t <- damage w]
+    where
+        m = 1 + multishot w
+        c = 1 + (critChance w) * (critMultiplier w)
+        -- TODO: Incorrect, currently just adding an incorrect status damage (2x total)
+        s = 1 + status w
+
+effectiveFireRate :: Weapon -> Float
+effectiveFireRate w = m * f / (m + r * f)
+    -- shots * (shots / second) / ( shots + seconds * (shots / second))
+    where
+        m = fromIntegral $ magazine w  -- shots
+        f = fireRate w                 -- shots/second
+        r = reload w                   -- seconds
+
+damagePerSecond :: Weapon -> Float
+damagePerSecond w = s * effectiveFireRate w
+    where
+        s = sum [a | Damage a _ <- averageShotDamage w]
 
 lanka  :: Weapon
 vulkar :: Weapon
@@ -145,31 +177,54 @@ vulkar = Weapon {
     status=0.25
     }
 
-speedTrigger :: Mod
-infectedClip :: Mod
-piercingHit  :: Mod
-rupture      :: Mod
-sawtoothClip :: Mod
-serration    :: Mod
-splitChamber :: Mod
-stormbringer :: Mod
-vitalSense   :: Mod
-pointStrike  :: Mod
-heavyCaliber :: Mod
-heavyCaliber = Mod "Heavy Caliber" [AnyDamage 1.65, Accuracy (-0.5)]
-infectedClip = Mod "Infected Clip" [ElementalDamage 0.9 Toxic]
-piercingHit  = Mod "Piercing Hit"  [ElementalDamage 0.3 Puncture]
-rupture      = Mod "Rupture"       [ElementalDamage 0.3 Impact]
-pointStrike  = Mod "Point Strike"  [CritChance 1.5]
-sawtoothClip = Mod "Sawtooth Clip" [ElementalDamage 0.3 Slash]
-serration    = Mod "Serration"     [AnyDamage 1.65]
-speedTrigger = Mod "Speed Trigger" [FireRate 0.6]
-splitChamber = Mod "Split Chamber" [Multishot 0.9]
-stormbringer = Mod "Stormbringer"  [ElementalDamage 0.9 Electricity]
-vitalSense   = Mod "Vital Sense"   [CritMultiplier 1.2]
+rifleMods :: [Mod]
+rifleMods = [
+    Mod "Ammo Drum"       [Capacity 0.3],
+    Mod "Critical Delay"  [CritChance 0.48, FireRate (-0.36)],
+    Mod "Cryo Rounds"     [ElementalDamage 0.9 Cold],
+    Mod "Fast Hands"      [Reload (-0.3)],
+    Mod "Hammershot"      [CritMultiplier 0.6, Status 0.4],
+    Mod "Heavy Caliber"   [AnyDamage 1.65, Accuracy (-0.5)],
+    Mod "Hellfire"        [ElementalDamage 0.9 Heat],
+    Mod "High Voltage"    [ElementalDamage 0.6 Electricity, Status 0.6],
+    Mod "Infected Clip"   [ElementalDamage 0.9 Toxic],
+    Mod "Magazine Warp"   [MagazineCapacity 0.3],
+    Mod "Malignant Force" [ElementalDamage 0.6 Toxic, Status 0.6],
+    Mod "Piercing Hit"    [ElementalDamage 0.3 Puncture],
+    Mod "Point Strike"    [CritChance 1.5],
+    Mod "Rifle Aptitude"  [Status 0.15],
+    Mod "Rime Rounds"     [ElementalDamage 0.6 Cold, Status 0.6],
+    Mod "Rupture"         [ElementalDamage 0.3 Impact],
+    Mod "Sawtooth Clip"   [ElementalDamage 0.3 Slash],
+    Mod "Serration"       [AnyDamage 1.65],
+    Mod "Shred"           [FireRate 0.3], -- Add punch-through
+    Mod "Speed Trigger"   [FireRate 0.6],
+    Mod "Split Chamber"   [Multishot 0.9],
+    Mod "Stormbringer"    [ElementalDamage 0.9 Electricity],
+    Mod "Tainted Mag"     [MagazineCapacity 0.66, Reload 0.33],
+    Mod "Thermite Rounds" [ElementalDamage 0.6 Heat, Status 0.6],
+    Mod "Vital Sense"     [CritMultiplier 1.2],
+    Mod "Wildfire"        [MagazineCapacity 0.2, ElementalDamage 0.6 Heat]
+    ]
 
 mods :: [Mod]
-mods = [serration, speedTrigger, splitChamber, heavyCaliber, stormbringer, infectedClip, pointStrike, vitalSense]
+mods = modsByNames ["Serration", "Speed Trigger", "Split Chamber", "Heavy Caliber", "Stormbringer", "Infected Clip", "Point Strike", "Vital Sense"] rifleMods
+
+combos :: [[Mod]]
+combos = choose 8 rifleMods
+
+findMaximum :: (a -> Float) -> (Float, a) -> a -> (Float, a)
+findMaximum f (av, a) b = if bv > av then (bv, b) else (av, a)
+    where
+        bv = f b
+
+cmpFst :: Ord a => (a, b) -> (a, b) -> Ordering
+cmpFst (a, _) (b, _) = compare a b
+
+findMaximumN :: Int -> (a -> Float) -> [(Float, a)] -> a -> [(Float, a)]
+findMaximumN n f as b = take n vs
+    where
+        vs = sortBy (flip cmpFst) (as ++ [(f b, b)])
 
 main :: IO ()
 main = print "test"
