@@ -35,7 +35,6 @@ mergeElemental Electricity Toxic = Just Corrosive
 mergeElemental Toxic Electricity = Just Corrosive
 mergeElemental _ _               = Nothing
 
-
 mergeBasicElementals :: [Damage] -> [Damage]
 mergeBasicElementals [a]                        = [a]
 mergeBasicElementals (Damage a b:Damage c d:xs) = case mergeElemental b d of
@@ -48,3 +47,6 @@ mergeElementals d = sumByDamageType p ++ c ++ e
         p = [Damage a t | Damage a t <- d, t `elem` physical]
         c = [Damage a t | Damage a t <- d, t `elem` combined]
         e = mergeBasicElementals [Damage a t | Damage a t <- d, t `elem` elemental]
+
+sumDamage :: [Damage] -> Float
+sumDamage d = sum [a | Damage a _ <- d]
