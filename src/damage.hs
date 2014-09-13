@@ -20,26 +20,29 @@ sumByDamageType d = [Damage (sum [a | Damage a b <- d, b == t]) t | t <- types]
     where
         types = nub [t | Damage _ t <- d]
 
-mergeElemental :: Type -> Type -> Maybe Type
-mergeElemental Heat Cold         = Just Blast
-mergeElemental Cold Heat         = Just Blast
-mergeElemental Heat Electricity  = Just Radiation
-mergeElemental Electricity Heat  = Just Radiation
-mergeElemental Heat Toxic        = Just Gas
-mergeElemental Toxic Heat        = Just Gas
-mergeElemental Cold Electricity  = Just Magnetic
-mergeElemental Electricity Cold  = Just Magnetic
-mergeElemental Cold Toxic        = Just Viral
-mergeElemental Toxic Cold        = Just Viral
-mergeElemental Electricity Toxic = Just Corrosive
-mergeElemental Toxic Electricity = Just Corrosive
-mergeElemental _ _               = Nothing
+-- | mergeType merges the given basic elemental 'Type' into complex types.
+-- Gives Nothing in case the given types cannot be merged.
+mergeType :: Type -> Type -> Maybe Type
+mergeType Heat Cold         = Just Blast
+mergeType Cold Heat         = Just Blast
+mergeType Heat Electricity  = Just Radiation
+mergeType Electricity Heat  = Just Radiation
+mergeType Heat Toxic        = Just Gas
+mergeType Toxic Heat        = Just Gas
+mergeType Cold Electricity  = Just Magnetic
+mergeType Electricity Cold  = Just Magnetic
+mergeType Cold Toxic        = Just Viral
+mergeType Toxic Cold        = Just Viral
+mergeType Electricity Toxic = Just Corrosive
+mergeType Toxic Electricity = Just Corrosive
+mergeType _ _               = Nothing
 
 mergeBasicElementals :: [Damage] -> [Damage]
+mergeBasicElementals []                         = []
 mergeBasicElementals [a]                        = [a]
-mergeBasicElementals (Damage a b:Damage c d:xs) = case mergeElemental b d of
-    Just x  -> Damage (a + c) x        : xs
-    Nothing -> Damage a b : mergeBasicElementals (Damage c d : xs)
+mergeBasicElementals (Damage a b:Damage c d:xs) = case mergeType b d of
+    Just x  -> Damage (a + c) x : xs
+    Nothing -> Damage a b       : mergeBasicElementals (Damage c d : xs)
 
 mergeElementals :: [Damage] -> [Damage]
 mergeElementals d = sumByDamageType p ++ c ++ e
