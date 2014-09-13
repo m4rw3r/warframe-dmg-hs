@@ -230,6 +230,18 @@ main :: IO ()
 main = print "test"
     >> print physicalDamageTypes
     >> print lanka
+    >> print (length mods)
     >> print mods
-    >> print (applyMods lanka mods)
     >> print (applyMods vulkar mods)
+    >> print l
+    >> print (damagePerSecond l)
+    >> print (applyMods lanka (modsByNames ["Critical Delay","Cryo Rounds","Heavy Caliber","Hellfire","Point Strike","Serration","Split Chamber","Vital Sense"] rifleMods))
+    >> print (damagePerSecond (applyMods lanka (modsByNames ["Critical Delay","Cryo Rounds","Heavy Caliber","Hellfire","Point Strike","Serration","Split Chamber","Vital Sense"] rifleMods)))
+    >> print (length combos)
+    >> print d
+    >> print (map modName m)
+    >> print ms
+    where
+        l = applyMods lanka mods
+        (d, m) = foldl' (findMaximum (damagePerSecond . applyMods lanka)) (0, []) combos
+        ms = foldl' (findMaximumN 10 (damagePerSecond . applyMods lanka)) [] combos
