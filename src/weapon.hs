@@ -23,7 +23,7 @@ sum1 :: Num a => [a] -> a
 sum1 = foldr (+) 1
 
 applyDamage :: Weapon -> [ModValue] -> Weapon
-applyDamage w m = w { damage = sumByDamageType $ concat [b, e, p] }
+applyDamage w m = w { damage = sumByDamageType $ concat [p, b, e] }
     where
         -- Base damage modifying constant
         k = sum1 [a | AnyDamage a <- m]
@@ -94,7 +94,7 @@ effectiveFireRate w = m * f / (m + r * f)
         f = fireRate w                 -- shots/second
         r = reload w                   -- seconds
 
-damagePerSecond :: Weapon -> Float
-damagePerSecond w = s * effectiveFireRate w
+damagePerSecond :: Weapon -> [Damage]
+damagePerSecond w = [Damage (a * f) t | Damage a t <- averageShotDamage w]
     where
-        s = sum [a | Damage a _ <- averageShotDamage w]
+        f = effectiveFireRate w
