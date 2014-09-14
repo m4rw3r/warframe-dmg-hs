@@ -1,4 +1,4 @@
-module Rifles (lanka, vulkar, mods) where
+module Rifles where
 
 import Weapon
 import Damage
