@@ -35,16 +35,21 @@ modValues (Mod _ v) = v
 modByName :: String -> [Mod] -> Maybe Mod
 modByName n = find (\x -> modName x == n)
 
--- Has to be a custom implementation to keep the order of the input list
+-- | modsByNames will find the matching Mod instances of the given list of strings.
+-- Gives the name of the mod in case the mod cannot be found.
+-- 
+-- The resulting list of Mods will be ordered in the same order as the list of
+-- mod names.
 modsByNames :: [String] -> [Mod] -> Either String [Mod]
 modsByNames [] _     = Right []
 modsByNames (x:xs) m = case (find (\y -> modName y == x) m, modsByNames xs m) of
     (Just z, Right zs) -> Right (z : zs)
     (Just _, Left zs)  -> Left zs
-    (Nothing, _)       -> Left $ "Mod not found: " ++ x
+    (Nothing, _)       -> Left x
 
--- Utility function to abort execution in case a mod is missing
+-- | forceModsByNames is modsByNames but will raise an error in case any mod in
+-- the given list cannot be found.
 forceModsByNames :: [String] -> [Mod] -> [Mod]
 forceModsByNames n m = case modsByNames n m of
     Right x -> x
-    Left  x -> error x
+    Left  x -> error $ "Mod not found: " ++ x
