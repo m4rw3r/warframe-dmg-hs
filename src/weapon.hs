@@ -1,7 +1,9 @@
-module Weapon (Weapon (..), applyMods, critDamage, effectiveFireRate, damagePerSecond, averageStatusDamage) where
+module Weapon (Weapon (..), applyMods, critDamage, effectiveFireRate, damagePerSecond, averageStatusDamage, damageWithChance, mostCommonDamagePerShot) where
 
 import Damage
 import Mod
+import Utils (cmpFst)
+import Data.List (maximumBy)
 
 data Weapon =
     Weapon {
@@ -98,3 +100,38 @@ damagePerSecond :: Weapon -> [Damage]
 damagePerSecond w = [Damage (a * f) t | Damage a t <- averageShotDamage w]
     where
         f = effectiveFireRate w
+
+damageWithChance :: Weapon -> [(Float, [Damage])]
+damageWithChance w = [
+    -- no multishot, no crit, no status
+    (nM * nC * nS, damage w),
+    -- no multishot, no crit, status
+    -- TODO: This is a wrong simplistic calculation
+    (nM * nC * s, [Damage (2 * a) b | Damage a b <- damage w]),
+    -- no multishot, crit, no status
+    (nM * c * nS, critDamage w),
+    -- no multishot, crit, status
+    -- TODO: Wrong and simplistic
+    (nM * c * s, [Damage (2 * a) b | Damage a b <- critDamage w]),
+    -- multishot, no crit, no status
+    (m * nC * nS, [Damage (m * a) b | Damage a b <- damage w]),
+    -- multishot, no crit, status
+    -- TODO: Wrong and simplistic
+    (m * nC * s, [Damage (2 * m * a) b | Damage a b <- damage w]),
+    -- multishot, crit, no status
+    (m * c * nS, [Damage (m * a) b | Damage a b <- critDamage w]),
+    -- multishot, crit, status
+    -- TODO: Wrong and simplistic
+    (m * c * s, [Damage (2 * m * a) b | Damage a b <- critDamage w])
+    ]
+    where
+        m  = multishot w
+        c  = critChance w
+        s  = status w
+        nM = 1 - m
+        nC = 1 - c
+        nS = 1 - s
+
+
+mostCommonDamagePerShot :: Weapon -> (Float, [Damage])
+mostCommonDamagePerShot w = maximumBy cmpFst (damageWithChance w)
