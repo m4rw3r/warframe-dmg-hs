@@ -1,4 +1,4 @@
-module Damage where
+module Damage (Damage (..), Type (..), physical, elemental, combined, sumByDamageType, mergeType, mergeElementals, sumDamage) where
 
 import Data.List
 
