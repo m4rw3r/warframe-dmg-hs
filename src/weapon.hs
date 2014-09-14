@@ -23,7 +23,7 @@ sum1 :: Num a => [a] -> a
 sum1 = foldr (+) 1
 
 applyDamage :: Weapon -> [ModValue] -> Weapon
-applyDamage w m = w { damage = sumByDamageType $ concat [p, b, e] }
+applyDamage w m = w { damage = mergeElementals $ sumByDamageType $ concat [p, b, e] }
     where
         -- Base damage modifying constant
         k = sum1 [a | AnyDamage a <- m]
