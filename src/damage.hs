@@ -41,7 +41,7 @@ mergeBasicElementals :: [Damage] -> [Damage]
 mergeBasicElementals []                         = []
 mergeBasicElementals [a]                        = [a]
 mergeBasicElementals (Damage a b:Damage c d:xs) = case mergeType b d of
-    Just x  -> Damage (a + c) x : xs
+    Just x  -> Damage (a + c) x : mergeBasicElementals xs
     Nothing -> Damage a b       : mergeBasicElementals (Damage c d : xs)
 
 mergeElementals :: [Damage] -> [Damage]
