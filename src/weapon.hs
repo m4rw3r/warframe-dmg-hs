@@ -60,7 +60,7 @@ applyCritMultiplier w m = w { critMultiplier = sum1 [x | CritMultiplier x <- m] 
 applyFireRate w m       = w { fireRate       = sum1 [x | FireRate x <- m] * fireRate w }
 applyMagazine w m       = w { magazine       = floor $ sum1 [x | MagazineCapacity x <- m] * fromIntegral (magazine w) }
 applyMultishot w m      = w { multishot      = sum [x | Multishot x <- m] + multishot w }
-applyReload w m         = w { reload         = sum1 [x | Reload x <- m] * reload w }
+applyReload w m         = w { reload         = reload w / sum1 [x | ReloadSpeed x <- m] }
 applyStatus w m         = w { status         = sum1 [x | Status x <- m] * status w }
 
 applyMods :: Weapon -> [Mod] -> Weapon

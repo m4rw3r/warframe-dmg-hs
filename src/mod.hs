@@ -13,7 +13,7 @@ data ModValue =
     | FireRate Float
     | MagazineCapacity Float
     | Multishot Float
-    | Reload Float
+    | ReloadSpeed Float
     | Status Float
         deriving (Show, Eq)
 

@@ -38,7 +38,7 @@ mods = [
     Mod "Ammo Drum"       [Capacity 0.3],
     Mod "Critical Delay"  [CritChance 0.48, FireRate (-0.36)],
     Mod "Cryo Rounds"     [ElementalDamage 0.9 Cold],
-    Mod "Fast Hands"      [Reload (-0.3)],
+    Mod "Fast Hands"      [ReloadSpeed 0.3],
     Mod "Hammershot"      [CritMultiplier 0.6, Status 0.4],
     Mod "Heavy Caliber"   [AnyDamage 1.65, Accuracy (-0.5)],
     Mod "Hellfire"        [ElementalDamage 0.9 Heat],
@@ -57,7 +57,7 @@ mods = [
     Mod "Speed Trigger"   [FireRate 0.6],
     Mod "Split Chamber"   [Multishot 0.9],
     Mod "Stormbringer"    [ElementalDamage 0.9 Electricity],
-    Mod "Tainted Mag"     [MagazineCapacity 0.66, Reload 0.33],
+    Mod "Tainted Mag"     [MagazineCapacity 0.66, ReloadSpeed (-0.33)],
     Mod "Thermite Rounds" [ElementalDamage 0.6 Heat, Status 0.6],
     Mod "Vital Sense"     [CritMultiplier 1.2],
     Mod "Wildfire"        [MagazineCapacity 0.2, ElementalDamage 0.6 Heat]
