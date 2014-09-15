@@ -84,15 +84,8 @@ applyMods w m = foldl (\x y -> y x v) w fns
         v   = concatMap modValues m
         fns = [applyDamage, applyAccuracy, applyCapacity, applyCritChance, applyCritMultiplier, applyFireRate, applyMagazine, applyMultishot, applyReload, applyStatus]
 
-critDamage :: Weapon -> [Damage]
-critDamage w = [Damage (a * m) t | Damage a t <- damage w]
-    where
-        m = critMultiplier w
-
--- Incorrect, the status-chance is a weighted distribution depending on the total damage
-averageStatusDamage :: Weapon -> Float
-averageStatusDamage w = sum [a * 2 | Damage a _ <- damage w] / fromIntegral (length $ damage w)
-
+-- | averageShotDamage is the average damage compensating for crit chance, critical
+-- multiplier, multishot and status chance.
 averageShotDamage :: Weapon -> [Damage]
 averageShotDamage w = [Damage (a * m * c * s) t | Damage a t <- damage w]
     where
@@ -101,6 +94,7 @@ averageShotDamage w = [Damage (a * m * c * s) t | Damage a t <- damage w]
         -- TODO: Incorrect, currently just adding an incorrect status damage (2x total)
         s = 1 + status w
 
+-- | effectiveFireRate takes reload and magazine size into account.
 effectiveFireRate :: Weapon -> Float
 effectiveFireRate w = m * f / (m + r * f)
     -- shots * (shots / second) / ( shots + seconds * (shots / second))
