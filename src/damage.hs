@@ -8,6 +8,9 @@ data Type = Impact | Puncture | Slash | Heat | Cold | Electricity | Toxic | Blas
 data Damage = Damage Float Type
     deriving (Show, Eq)
 
+instance Ord Damage where
+    Damage a _ <= Damage b _ = a <= b
+
 -- | physical is the list of physical damage types.
 physical  :: [Type]
 -- | elemental is the list of basic elemental damage types.
