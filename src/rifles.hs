@@ -4,8 +4,21 @@ import Weapon
 import Damage
 import Mod
 
+dread :: Weapon
+dread = Weapon {
+    accuracy=1.0,
+    capacity=72,
+    critChance=0.50,
+    critMultiplier=2.0,
+    damage=[Damage 10 Impact, Damage 10 Puncture, Damage 180 Slash],
+    fireRate=1.0,
+    magazine=1,
+    multishot=0,
+    name="Dread",
+    reload=1.0,
+    status=0.20
+    }
 lanka  :: Weapon
-vulkar :: Weapon
 lanka = Weapon {
     accuracy=1.0,
     capacity=72,
@@ -19,6 +32,7 @@ lanka = Weapon {
     reload=2.0,
     status=0.25
     }
+vulkar :: Weapon
 vulkar = Weapon {
     accuracy=0.133,
     capacity=72,
