@@ -2,6 +2,7 @@ module Damage (Damage (..), Type (..), physical, elemental, combined, sumByDamag
 
 import Data.List
 
+-- | Type are the different damage types used in the game.
 data Type = Impact | Puncture | Slash | Heat | Cold | Electricity | Toxic | Blast | Corrosive | Gas | Magnetic | Radiation | Viral
     deriving (Eq, Ord, Enum, Read, Show, Bounded)
 
@@ -12,14 +13,14 @@ instance Ord Damage where
     Damage a _ <= Damage b _ = a <= b
 
 -- | physical is the list of physical damage types.
-physical  :: [Type]
+physical :: [Type]
+physical = [Impact, Puncture, Slash]
 -- | elemental is the list of basic elemental damage types.
 elemental :: [Type]
--- | combined is the list of combined elemental damage types.
-combined  :: [Type]
-physical  = [Impact, Puncture, Slash]
 elemental = [Heat, Cold, Electricity, Toxic]
-combined  = [Blast, Corrosive, Gas, Magnetic, Radiation, Viral]
+-- | combined is the list of combined elemental damage types.
+combined :: [Type]
+combined = [Blast, Corrosive, Gas, Magnetic, Radiation, Viral]
 
 -- | sumByDamageType groups and summarizes all damages, preserving order of the first occurance
 -- of the damage type.
