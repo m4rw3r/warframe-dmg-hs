@@ -56,7 +56,7 @@ applyMultishot      :: Weapon -> [ModValue] -> Weapon
 applyReload         :: Weapon -> [ModValue] -> Weapon
 applyStatus         :: Weapon -> [ModValue] -> Weapon
 applyAccuracy w m       = w { accuracy       = sum1 [x | Accuracy x <- m] * accuracy w }
-applyCapacity w m       = w { capacity       = floor $ foldr (+) 1 [x | Capacity x <- m] * fromIntegral (capacity w) }
+applyCapacity w m       = w { capacity       = floor $ sum1 [x | Capacity x <- m] * fromIntegral (capacity w) }
 applyCritChance w m     = w { critChance     = sum1 [x | CritChance x <- m] * critChance w }
 applyCritMultiplier w m = w { critMultiplier = sum1 [x | CritMultiplier x <- m] * critMultiplier w }
 applyFireRate w m       = w { fireRate       = sum1 [x | FireRate x <- m] * fireRate w }
