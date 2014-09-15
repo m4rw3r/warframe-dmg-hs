@@ -1,9 +1,22 @@
-module Weapon (Weapon (..), applyMods, critDamage, effectiveFireRate, damagePerSecond, averageStatusDamage, damageWithChance, mostCommonDamagePerShot) where
+module Weapon (
+    Weapon (..),
+    applyMods,
+    effectiveFireRate,
+    damagePerSecond,
+    damageProbabilities,
+    mostCommonDamagePerShot,
+    shotProbabilities,
+    Shot (..)
+    ) where
+
+import Data.List (sort, maximumBy)
+import Data.Tuple (swap)
+import Control.Monad (liftM2)
+import qualified Numeric.Probability.Distribution as Dist
 
 import Damage
 import Mod
-import Utils (cmpFst)
-import Data.List (maximumBy)
+import Utils
 
 data Weapon =
     Weapon {
@@ -96,42 +109,78 @@ effectiveFireRate w = m * f / (m + r * f)
         f = fireRate w                 -- shots/second
         r = reload w                   -- seconds
 
+-- | damagePerSecond is the average damage the weapon will produce during
+-- a second.
 damagePerSecond :: Weapon -> [Damage]
 damagePerSecond w = [Damage (a * f) t | Damage a t <- averageShotDamage w]
     where
         f = effectiveFireRate w
 
-damageWithChance :: Weapon -> [(Float, [Damage])]
-damageWithChance w = [
-    -- no multishot, no crit, no status
-    (nM * nC * nS, damage w),
-    -- no multishot, no crit, status
-    -- TODO: This is a wrong simplistic calculation
-    (nM * nC * s, [Damage (2 * a) b | Damage a b <- damage w]),
-    -- no multishot, crit, no status
-    (nM * c * nS, critDamage w),
-    -- no multishot, crit, status
-    -- TODO: Wrong and simplistic
-    (nM * c * s, [Damage (2 * a) b | Damage a b <- critDamage w]),
-    -- multishot, no crit, no status
-    (m * nC * nS, [Damage (m * a) b | Damage a b <- damage w]),
-    -- multishot, no crit, status
-    -- TODO: Wrong and simplistic
-    (m * nC * s, [Damage (2 * m * a) b | Damage a b <- damage w]),
-    -- multishot, crit, no status
-    (m * c * nS, [Damage (m * a) b | Damage a b <- critDamage w]),
-    -- multishot, crit, status
-    -- TODO: Wrong and simplistic
-    (m * c * s, [Damage (2 * m * a) b | Damage a b <- critDamage w])
-    ]
-    where
-        m  = multishot w
-        c  = critChance w
-        s  = status w
-        nM = 1 - m
-        nC = 1 - c
-        nS = 1 - s
+-- | ShotEvent are the types representing a critical hit or a status proc
+-- on a shot.
+data ShotEvent = Critical | StatusProc
+    deriving (Eq, Show, Ord, Enum)
 
+-- | Shot is the occurence of a shot fired from the weapon. The nested list
+-- is the occurences of criticals and status procs on the shot.
+data Shot = Shot [ShotEvent] | NoShot
+    deriving (Show, Ord)
+
+-- | Shot also implements Eq in a way which does not differentiate between
+-- the orders of the nested ShotEvents.
+instance Eq Shot where
+    Shot a == Shot b = and [e `elem` b | e <- a] && and [e `elem` a | e <- b]
+    NoShot == NoShot = True
+    _ == _ = False
+
+-- | eventP will return a distribution of the possible occurances of e
+-- given the probability p, where p can be greater than 1.
+-- 
+-- A probability greater than 1 means that the event will always happen
+-- at least once, and that it can happen more than one time simultaneously.
+eventP :: ShotEvent -> Float -> Dist.T Float [ShotEvent]
+eventP e p | p < 1 = Dist.choose p [e] []
+eventP e p         = liftM2 (++) (Dist.certainly [e]) (eventP e (p - 1))
+
+-- | shotDists is the distribution of crits and status procs on a single shot.
+shotDists :: Weapon -> Dist.T Float Shot
+shotDists w = Dist.map Shot (liftM2 (++) (eventP Critical (critChance w)) (eventP StatusProc (status w)))
+
+-- | multishotP is the probability of different numbers of shots fired from
+-- the weapon with one pull of the trigger, as well as the probability
+-- of different effects on the shots themselves.
+multishotP :: Weapon -> Float -> Dist.T Float [Shot]
+multishotP w p | p < 1 = Dist.map (: []) (Dist.unfold (Dist.choose p (shotDists w) (Dist.certainly NoShot)))
+multishotP w p = liftM2 (++) (Dist.map (: []) (shotDists w)) (multishotP w (p - 1))
+
+-- | shotProbabilities is the possible outcomes of firing the weapon with a
+-- single pull of the trigger, in terms of number of shots, if they crit and/or
+-- produce a status effect.
+shotProbabilities :: Weapon -> Dist.T Float [Shot]
+shotProbabilities w = Dist.lift Dist.sortP p
+    where
+        -- Sort the shots and then normalize, order does not matter
+        p = Dist.norm (Dist.map sort m)
+        m = multishotP w (1 + multishot w)
+
+damageForShot :: Weapon -> Shot -> [Damage]
+damageForShot w (Shot a) = [Damage (d * m * s) t | Damage d t <- damage w]
+    where
+        c = sum [1 | Critical <- a]
+        m = 1 + c * (critMultiplier w - 1)
+        -- TODO: This is wrong, it is not straight up 2x damage on a single Damage,
+        -- works as an approximation for few damage types however
+        s = 1 + sum [1 | StatusProc <- a] / fromIntegral (length (damage w))
+damageForShot w _ = damage w
+
+damageForShots :: Weapon -> [Shot] -> [Damage]
+damageForShots w s = sumByDamageType $ concatMap (damageForShot w) s
+
+-- | damageProbabilities are the different damages and their probabilities
+-- resulting from a single pull of the trigger of the weapon.
+damageProbabilities :: Weapon -> Dist.T Float [Damage]
+damageProbabilities w = Dist.map (damageForShots w) (shotProbabilities w)
 
 mostCommonDamagePerShot :: Weapon -> (Float, [Damage])
-mostCommonDamagePerShot w = maximumBy cmpFst (damageWithChance w)
+mostCommonDamagePerShot w = swap $ maximumBy cmpSnd (Dist.decons (damageProbabilities w))
+

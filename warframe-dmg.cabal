@@ -50,7 +50,7 @@ executable warframe-dmg
   -- other-modules:       
   
   -- Other library packages from which modules are imported.
-  build-depends:       combinat, base ==4.6.*
+  build-depends:       combinat, probability, base ==4.6.*
   
   -- Directories containing source files.
   hs-source-dirs:      src
