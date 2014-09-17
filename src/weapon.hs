@@ -37,8 +37,14 @@ data Weapon =
 sum1 :: Num a => [a] -> a
 sum1 = foldr (+) 1
 
+-- | applyDamage applies all damage-affecting values of the given ModValues, adding
+-- the new elementals before the base damage of the weapon.
+-- 
+-- Note that elementals are concatenated before base damage, this is because
+-- weapon base damage elementals are applied last when merging basic elemental
+-- types into combined elementals.
 applyDamage :: Weapon -> [ModValue] -> Weapon
-applyDamage w m = w { damage = mergeElementals $ sumByDamageType $ concat [p, b, e] }
+applyDamage w m = w { damage = mergeElementals $ sumByDamageType $ concat [p, e, b] }
     where
         -- Base damage modifying constant
         k = sum1 [a | AnyDamage a <- m]
