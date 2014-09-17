@@ -159,7 +159,8 @@ multishotP w p = liftM2 (++) (Dist.map (: []) (shotDists w)) (multishotP w (p - 
 shotProbabilities :: Weapon -> Dist.T Float [Shot]
 shotProbabilities w = Dist.lift Dist.sortP p
     where
-        -- Sort the shots and then normalize, order does not matter
+        -- Sort the shots and then normalize, will merge occurences like
+        -- (a, b) with (b, a); order does not matter
         p = Dist.norm (Dist.map sort m)
         m = multishotP w (1 + multishot w)
 
@@ -167,6 +168,8 @@ damageForShot :: Weapon -> Shot -> [Damage]
 damageForShot w (Shot a) = [Damage (d * m * s) t | Damage d t <- damage w]
     where
         c = sum [1 | Critical <- a]
+        -- becomes critMultiplier in the common case and
+        -- (2 * critMultiplier - 1) for red-crits (ie. 100% < critChance < 200%, 2x Critical)
         m = 1 + c * (critMultiplier w - 1)
         -- TODO: This is wrong, it is not straight up 2x damage on a single Damage,
         -- works as an approximation for few damage types however
