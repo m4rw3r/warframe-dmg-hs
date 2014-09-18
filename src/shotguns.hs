@@ -28,7 +28,7 @@ drakgoonUncharged = Weapon {
     fireRate=3.6, -- uncharged
     magazine=7,
     multishot=0,
-    name="Drakgoon Charged",
+    name="Drakgoon Uncharged",
     reload=2.3,
     status=0.10
     }
