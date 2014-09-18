@@ -32,6 +32,20 @@ lanka = Weapon {
     reload=2.0,
     status=0.25
     }
+vectis :: Weapon
+vectis = Weapon {
+    accuracy=0.133,
+    capacity=72,
+    critChance=0.25,
+    critMultiplier=2.0,
+    damage=[Damage 90 Impact, Damage 78.8 Puncture, Damage 56.3 Slash],
+    fireRate=1.5,
+    magazine=1,
+    multishot=0,
+    name="Vectis",
+    reload=0.9,
+    status=0.30
+    }
 vulkar :: Weapon
 vulkar = Weapon {
     accuracy=0.133,
