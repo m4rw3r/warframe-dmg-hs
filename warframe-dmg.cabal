@@ -50,7 +50,11 @@ executable warframe-dmg
   -- other-modules:       
   
   -- Other library packages from which modules are imported.
-  build-depends:       combinat, probability, base ==4.6.*
+  build-depends:       threepenny-gui == 0.4.*,
+                       combinat,
+                       probability,
+                       containers,
+                       base == 4.7.*
   
   -- Directories containing source files.
   hs-source-dirs:      src
