@@ -32,6 +32,20 @@ lanka = Weapon {
     reload=2.0,
     status=0.25
     }
+snipetronVandal  :: Weapon
+snipetronVandal = Weapon {
+    accuracy=0.133,
+    capacity=72,
+    critChance=0.25,
+    critMultiplier=2.0,
+    damage=[Damage 7.5 Impact, Damage 135 Puncture, Damage 7.5 Slash],
+    fireRate=1.5,
+    magazine=6,
+    multishot=0,
+    name="Snipetron Vandal",
+    reload=2.0,
+    status=0.25
+    }
 vectis :: Weapon
 vectis = Weapon {
     accuracy=0.133,
