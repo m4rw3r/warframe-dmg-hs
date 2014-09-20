@@ -26,17 +26,19 @@ setup :: Window -> UI ()
 setup window = void $ mdo
     return window # set title "Warframe Mod Optimizer"
     
-    selType <- UI.select # set UI.name "weapon-type-select"
+    selType   <- UI.select # set UI.name "weapon-type-select"
                      # set UI.id_ "weapon-type-select" #+ [
-                         UI.option #+ [string "Rifle"], 
+                         UI.option #+ [string "Select type"],
+                         UI.option #+ [string "Rifle"],
                          UI.option #+ [string "Shotgun"],
                          UI.option #+ [string "Pistol"]
                          ]
-    selWeapon <- UI.select # set UI.name "weapon-select"
-                    # set UI.id_ "weapon-select" #+ (weaponOption <$> (weaponsOfType Rifle))
-    selMods <- UI.div
+    selWeapon  <- UI.select # set UI.name "weapon-select"
+                    # set UI.id_ "weapon-select"
+    selMods    <- UI.div
     chosenMods <- UI.ul
     chosenType <- UI.p
+    dps <- UI.p
     
     getBody window #+ [string "Weapon type: ",
         element selType,
@@ -45,26 +47,37 @@ setup window = void $ mdo
         element selWeapon,
         string "Mods: ",
         element selMods,
-        element chosenMods]
+        element chosenMods,
+        element dps]
     
     -- events
-    let eType = UI.selectionChange selType
+    let eType    = UI.selectionChange selType
+    let eWeapon  = UI.selectionChange selWeapon
+    let eWeapObj = bSelToWeapon <@> eWeapon
     
     -- behaviours
-    bWeapon <- fmap (selToWeaponType <$>) $ stepper (Just 0) eType
-    let bWeaponList  = (weaponsOfType) <$> bWeapon
-        bModList     = (modsOfType)    <$> bWeapon
+    bWeaponType  <- fmap (selToWeaponType <$>) $ stepper Nothing eType
+    bApplyMods   <- fmap (maybeApplyMods  <$>) $ stepper Nothing eWeapObj
     
-    element chosenType # sink UI.text (show <$> bWeapon)
-    onChanges bWeapon $ \w -> do
-        (b, el) <- mkModList (modsOfType w)
+    let bWeaponList  = weaponsOfType <$> bWeaponType
+    let bModList     = modsOfType    <$> bWeaponType
+    let bSelToWeapon = selToWeapon   <$> bWeaponList
+    
+    element chosenType # sink UI.text (show <$> bWeaponType)
+    onChanges bWeaponType $ \w -> do
+        (bChecked, el) <- mkModList (modsOfType w)
         element selMods # set UI.children [] #+ [element el]
-        onChanges b $ \w -> do
-            element chosenMods # set UI.children [] #+ (modListItem <$> w)
+        
+        let bMods         = fmap modData <$> bChecked
+        let bModdedWeapon = bApplyMods <*> bMods
+        let bDPS          = fmap damagePerSecond <$> bModdedWeapon
+        
+        element dps # sink UI.text (show <$> bDPS)
+        onChanges bChecked $ \m -> do
+            element chosenMods # set UI.children [] #+ (modListItem <$> m)
+    
     onChanges bWeaponList $ \w -> do
         element selWeapon # set UI.children [] #+ (weaponOption <$> w)
-    -- onChanges bMods $ \m -> do
-    --    element selMods # set UI.children [] #+ (fmap fst) m
 
 weaponOption :: Weapon -> UI Element
 weaponOption w = UI.option # set UI.id_ (name w) #+ [string $ name w]
@@ -72,6 +85,10 @@ weaponOption w = UI.option # set UI.id_ (name w) #+ [string $ name w]
 modListItem :: ModChecked -> UI Element
 modListItem m = UI.li #+ [UI.p #+ [string $ modName (modData m)],
                           UI.p #+ [string $ intercalate ", " (fmap show (modValues (modData m)))]]
+
+maybeApplyMods :: Maybe Weapon -> ([Mod] -> Maybe Weapon)
+maybeApplyMods (Just w) = (\m -> Just $ applyMods w m)
+maybeApplyMods _        = (\_ -> Nothing)
 
 data ModChecked = ModChecked {
     modData    :: Mod,
@@ -115,21 +132,28 @@ checkedModName e = do
         True  -> e # get UI.value
         False -> return ""
 
-data WeaponType = Rifle | Shotgun | Pistol
+data WeaponType = Rifle | Shotgun | Pistol | None
     deriving (Show)
 
 selToWeaponType :: Maybe Int -> WeaponType
-selToWeaponType (Just 0) = Rifle
-selToWeaponType (Just 1) = Shotgun
-selToWeaponType (Just 2) = Pistol
-selToWeaponType _ = Rifle
+selToWeaponType (Just 1) = Rifle
+selToWeaponType (Just 2) = Shotgun
+selToWeaponType (Just 3) = Pistol
+selToWeaponType _        = None
+
+selToWeapon :: [Weapon] -> Maybe Int -> Maybe Weapon
+selToWeapon [] _       = Nothing
+selToWeapon w (Just i) = Just $ w !! i
+selToWeapon _ Nothing  = Nothing
 
 modsOfType :: WeaponType -> [Mod]
 modsOfType Rifle   = Rifles.mods
 modsOfType Shotgun = Shotguns.mods
 modsOfType Pistol  = Pistols.mods
+modsOfType None    = []
 
 weaponsOfType :: WeaponType -> [Weapon]
 weaponsOfType Rifle   = [Rifles.lanka, Rifles.dread, Rifles.vulkar]
 weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged]
 weaponsOfType Pistol  = [Pistols.despair]
+weaponsOfType None    = []
