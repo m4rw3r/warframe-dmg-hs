@@ -1,13 +1,17 @@
 module Damage (Damage (..), Type (..), physical, elemental, combined, sumByDamageType, mergeType, mergeElementals, sumDamage) where
 
 import Data.List
+import Text.Printf
 
 -- | Type are the different damage types used in the game.
 data Type = Impact | Puncture | Slash | Heat | Cold | Electricity | Toxic | Blast | Corrosive | Gas | Magnetic | Radiation | Viral
     deriving (Eq, Ord, Enum, Read, Show, Bounded)
 
 data Damage = Damage Float Type
-    deriving (Show, Eq)
+    deriving (Eq)
+
+instance Show Damage where
+    show (Damage d t) = printf "%s %5.1f" (show t) d
 
 instance Ord Damage where
     Damage a _ <= Damage b _ = a <= b
