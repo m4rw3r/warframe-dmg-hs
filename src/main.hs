@@ -26,58 +26,67 @@ setup :: Window -> UI ()
 setup window = void $ mdo
     return window # set title "Warframe Mod Optimizer"
     
-    selType   <- UI.select # set UI.name "weapon-type-select"
+    elSelType   <- UI.select # set UI.name "weapon-type-select"
                      # set UI.id_ "weapon-type-select" #+ [
                          UI.option #+ [string "Select type"],
                          UI.option #+ [string "Rifle"],
                          UI.option #+ [string "Shotgun"],
                          UI.option #+ [string "Pistol"]
                          ]
-    selWeapon  <- UI.select # set UI.name "weapon-select"
+    elSelWeapon  <- UI.select # set UI.name "weapon-select"
                     # set UI.id_ "weapon-select"
-    selMods    <- UI.div
-    chosenMods <- UI.ul
-    chosenType <- UI.p
-    dps <- UI.p
+    elSelMods    <- UI.div
+    elChosenMods <- UI.ul
+    elChosenWeapon <- UI.div
+    elModdedWeapon <- UI.div
+    dps        <- UI.p
     
-    getBody window #+ [string "Weapon type: ",
-        element selType,
-        element chosenType,
-        string "Weapon: ",
-        element selWeapon,
-        string "Mods: ",
-        element selMods,
-        element chosenMods,
-        element dps]
+    getBody window #+ [grid [
+            [
+            UI.new #+ [string "Weapon type: ", element elSelType], UI.new #+ [string "Weapon: ", element elSelWeapon]
+            ],
+            [
+            UI.new #+ [UI.new #+ [string "Mods: "], element elSelMods], element elChosenWeapon, element elChosenMods, element elModdedWeapon],
+            [element dps]
+            ]]
     
     -- events
-    let eType    = UI.selectionChange selType
-    let eWeapon  = UI.selectionChange selWeapon
+    let eType    = UI.selectionChange elSelType
+    let eWeapon  = UI.selectionChange elSelWeapon
     let eWeapObj = bSelToWeapon <@> eWeapon
     
     -- behaviours
     bWeaponType  <- fmap (selToWeaponType <$>) $ stepper Nothing eType
     bApplyMods   <- fmap (maybeApplyMods  <$>) $ stepper Nothing eWeapObj
+    bWeapon      <- stepper Nothing eWeapObj
     
-    let bWeaponList  = weaponsOfType <$> bWeaponType
+    let bWeaponList  = (fmap weaponsOfType) <$> bWeaponType
     let bModList     = modsOfType    <$> bWeaponType
     let bSelToWeapon = selToWeapon   <$> bWeaponList
     
-    element chosenType # sink UI.text (show <$> bWeaponType)
+    onChanges bWeapon $ \w -> do
+        element elChosenWeapon # set UI.children [] #+ case w of
+            Just w  -> [displayWeapon w]
+            Nothing -> [UI.new]
     onChanges bWeaponType $ \w -> do
         (bChecked, el) <- mkModList (modsOfType w)
-        element selMods # set UI.children [] #+ [element el]
+        element elSelMods # set UI.children [] #+ [element el]
         
         let bMods         = fmap modData <$> bChecked
         let bModdedWeapon = bApplyMods <*> bMods
         let bDPS          = fmap damagePerSecond <$> bModdedWeapon
+        let bModList      = fmap modListItem <$> bChecked
         
         element dps # sink UI.text (show <$> bDPS)
-        onChanges bChecked $ \m -> do
-            element chosenMods # set UI.children [] #+ (modListItem <$> m)
+        onChanges bModdedWeapon $ \w -> do
+            element elModdedWeapon # set UI.children [] #+ case w of
+                Just w  -> [displayWeapon w]
+                Nothing -> [UI.new]
+        onChanges bModList $ \m -> do
+            element elChosenMods # set UI.children [] #+ m
     
     onChanges bWeaponList $ \w -> do
-        element selWeapon # set UI.children [] #+ (weaponOption <$> w)
+        element elSelWeapon # set UI.children [] #+ ([UI.option #+ [string "Select Weapon"]] ++ (weaponOption <$> (fromMaybe [] w)))
 
 weaponOption :: Weapon -> UI Element
 weaponOption w = UI.option # set UI.id_ (name w) #+ [string $ name w]
@@ -85,6 +94,25 @@ weaponOption w = UI.option # set UI.id_ (name w) #+ [string $ name w]
 modListItem :: ModChecked -> UI Element
 modListItem m = UI.li #+ [UI.p #+ [string $ modName (modData m)],
                           UI.p #+ [string $ intercalate ", " (fmap show (modValues (modData m)))]]
+
+displayWeapon :: Weapon -> UI Element
+displayWeapon w = grid ([
+                    [UI.string (name w)],
+                    [UI.new # set html "&nbsp;"],
+                    [UI.string "Accuracy",            UI.string $ printf "%.0f" (100 * accuracy w)],
+                    [UI.string "Total ammo",          UI.string $ printf "%d" (capacity w)],
+                    [UI.string "Critical chance",     UI.string $ printf "%.1f%%" (100 * critChance w)],
+                    [UI.string "Critical multiplier", UI.string $ printf "%.2f" (critMultiplier w)],
+                    [UI.string "Fire rate",           UI.string $ printf "%.2f" (fireRate w)],
+                    [UI.string "Magazine size",       UI.string $ printf "%d" (magazine w)],
+                    [UI.string "Multishot",           UI.string $ printf "%.0f%%" (100 * multishot w)],
+                    [UI.string "Reload time",         UI.string $ printf "%.2f" (reload w)],
+                    [UI.string "Status Chance",       UI.string $ printf "%.1f%%" (100 * status w)],
+                    [UI.new # set html "&nbsp;"]
+                    ] ++ (fmap displayDamage (damage w)))
+
+displayDamage :: Damage -> [UI Element]
+displayDamage (Damage d t) = [UI.string $ show t, UI.string $ printf "%.1f" d]
 
 maybeApplyMods :: Maybe Weapon -> ([Mod] -> Maybe Weapon)
 maybeApplyMods (Just w) = (\m -> Just $ applyMods w m)
@@ -135,22 +163,22 @@ checkedModName e = do
 data WeaponType = Rifle | Shotgun | Pistol | None
     deriving (Show)
 
-selToWeaponType :: Maybe Int -> WeaponType
-selToWeaponType (Just 1) = Rifle
-selToWeaponType (Just 2) = Shotgun
-selToWeaponType (Just 3) = Pistol
-selToWeaponType _        = None
+selToWeaponType :: Maybe Int -> Maybe WeaponType
+selToWeaponType (Just 1) = Just Rifle
+selToWeaponType (Just 2) = Just Shotgun
+selToWeaponType (Just 3) = Just Pistol
+selToWeaponType _        = Nothing
 
-selToWeapon :: [Weapon] -> Maybe Int -> Maybe Weapon
-selToWeapon [] _       = Nothing
-selToWeapon w (Just i) = Just $ w !! i
-selToWeapon _ Nothing  = Nothing
+selToWeapon :: Maybe [Weapon] -> Maybe Int -> Maybe Weapon
+selToWeapon (Just []) _       = Nothing
+selToWeapon (Just w) (Just i) | i > 0 = Just $ w !! (i - 1)
+selToWeapon _ _ = Nothing
 
-modsOfType :: WeaponType -> [Mod]
-modsOfType Rifle   = Rifles.mods
-modsOfType Shotgun = Shotguns.mods
-modsOfType Pistol  = Pistols.mods
-modsOfType None    = []
+modsOfType :: Maybe WeaponType -> [Mod]
+modsOfType (Just Rifle)   = Rifles.mods
+modsOfType (Just Shotgun) = Shotguns.mods
+modsOfType (Just Pistol)  = Pistols.mods
+modsOfType Nothing = []
 
 weaponsOfType :: WeaponType -> [Weapon]
 weaponsOfType Rifle   = [Rifles.lanka, Rifles.dread, Rifles.vulkar]
