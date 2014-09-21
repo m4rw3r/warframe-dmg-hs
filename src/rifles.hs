@@ -46,6 +46,20 @@ snipetronVandal = Weapon {
     reload=2.0,
     status=0.25
     }
+synapse  :: Weapon
+synapse = Weapon {
+    accuracy=0.125,
+    capacity=540,
+    critChance=0.50,
+    critMultiplier=2.0,
+    damage=[Damage 12.5 Electricity],
+    fireRate=10,
+    magazine=100,
+    multishot=0,
+    name="Synapse",
+    reload=1.0,
+    status=0.025
+    }
 vectis :: Weapon
 vectis = Weapon {
     accuracy=0.133,
