@@ -4,9 +4,12 @@ import Control.Monad (void, liftM)
 import Data.List
 import Data.Maybe
 import Data.Monoid
+import Data.Vector (fromList, empty)
 import Math.Combinat.Sets (choose)
 import Text.Printf
 import qualified Numeric.Probability.Distribution as Dist
+import qualified Data.ByteString.Char8 as BS
+import System.IO (hPutStrLn, stderr)
 
 import Damage
 import Mod
@@ -18,12 +21,24 @@ import qualified Shotguns
 
 import qualified Graphics.UI.Threepenny as UI
 import Graphics.UI.Threepenny.Core hiding (delete)
+import Data.Aeson.Encode
+import Data.Aeson.Types as JSON
+
+tpConfig = Config
+    { tpPort = Nothing
+    , tpCustomHTML = Nothing
+    , tpStatic = Just "wwwroot"
+    , tpLog = \s -> BS.hPutStrLn stderr s
+    }
 
 main :: IO ()
-main = startGUI defaultConfig setup
+main = startGUI tpConfig setup
 
 setup :: Window -> UI ()
 setup window = void $ mdo
+    addScriptTag window "lib/jquery.flot.js"
+    UI.addStyleSheet window "styles.css"
+    
     return window # set title "Warframe Mod Optimizer"
     
     elSelType   <- UI.select # set UI.name "weapon-type-select"
@@ -39,15 +54,16 @@ setup window = void $ mdo
     elChosenMods <- UI.ul
     elChosenWeapon <- UI.div
     elModdedWeapon <- UI.div
-    dps        <- UI.p
+    dps            <- UI.p
+    elChart        <- UI.div # set UI.id_ "dmg_probabilities" # set UI.height 400 # set UI.width 600
     
     getBody window #+ [grid [
             [
             UI.new #+ [string "Weapon type: ", element elSelType], UI.new #+ [string "Weapon: ", element elSelWeapon]
             ],
             [
-            UI.new #+ [UI.new #+ [string "Mods: "], element elSelMods], element elChosenWeapon, element elChosenMods, element elModdedWeapon],
-            [element dps]
+            UI.new #+ [UI.new #+ [string "Mods: "], element elSelMods], element elChosenWeapon, element elChosenMods, element elModdedWeapon, UI.new #+ [element dps, element elChart]
+            ]
             ]]
     
     -- events
@@ -79,6 +95,9 @@ setup window = void $ mdo
         
         element dps # sink UI.text (show <$> bDPS)
         onChanges bModdedWeapon $ \w -> do
+            runFunction $ invokeGraph "#dmg_probabilities" (case w of
+                Just w  -> (toPairs (damageProbabilities w))
+                Nothing -> JSON.Array Data.Vector.empty)
             element elModdedWeapon # set UI.children [] #+ case w of
                 Just w  -> [displayWeapon w]
                 Nothing -> [UI.new]
@@ -110,6 +129,12 @@ displayWeapon w = grid ([
                     [UI.string "Status Chance",       UI.string $ printf "%.1f%%" (100 * status w)],
                     [UI.new # set html "&nbsp;"]
                     ] ++ (fmap displayDamage (damage w)))
+
+toPairs :: Dist.T Float [Damage] -> JSON.Value
+toPairs d = JSON.Array (fmap (\(x, y) -> JSON.Array (fromList [JSON.toJSON $ sumDamage x, JSON.toJSON y])) (fromList $ (sortBy (\(x1, _) (x2, _) -> compare x1 x2) (filter (\(x, y) -> y > 0) $ Dist.decons d))))
+
+invokeGraph :: String -> JSON.Value -> JSFunction ()
+invokeGraph = ffi "$.plot(%1, [{data: %2, bars: { show: true, lineWidth: 5, fill: true}}], {yaxis: {min: 0.0}, xaxis: {min: 0.0, }});"
 
 displayDamage :: Damage -> [UI Element]
 displayDamage (Damage d t) = [UI.string $ show t, UI.string $ printf "%.1f" d]
@@ -185,3 +210,9 @@ weaponsOfType Rifle   = [Rifles.lanka, Rifles.dread, Rifles.vulkar]
 weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged]
 weaponsOfType Pistol  = [Pistols.despair]
 weaponsOfType None    = []
+
+addScriptTag :: UI.Window -> String -> UI ()
+addScriptTag w filename = void $ do
+    el <- UI.mkElement "script"
+        # set UI.src ("/static/" ++ filename)
+    getHead w #+ [element el]

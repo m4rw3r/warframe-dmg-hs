@@ -51,6 +51,9 @@ executable warframe-dmg
   
   -- Other library packages from which modules are imported.
   build-depends:       threepenny-gui == 0.4.*,
+                       bytestring,
+                       aeson,
+                       vector,
                        combinat,
                        probability,
                        containers,
