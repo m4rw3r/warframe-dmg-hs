@@ -1,6 +1,7 @@
 module Mod where
 
 import Data.List (find)
+import Text.Printf
 import qualified Damage (Type)
 
 data ModValue =
@@ -15,7 +16,20 @@ data ModValue =
     | Multishot Float
     | ReloadSpeed Float
     | Status Float
-        deriving (Show, Eq)
+        deriving (Eq)
+
+instance Show ModValue where
+    show (Accuracy a)          = printf "%+.0f%% Accuracy" (a * 100)
+    show (AnyDamage a)         = printf "%+.0f%% Damage" (a * 100)
+    show (Capacity a)          = printf "%+.0f%% Ammo capacity" (a * 100)
+    show (CritChance a)        = printf "%+.0f%% Critical chance" (a * 100)
+    show (CritMultiplier a)    = printf "%+.0f%% Critical multiplier" (a * 100)
+    show (ElementalDamage a t) = printf "%+.0f%% Extra %s damage" (a * 100) (show t)
+    show (FireRate a)          = printf "%+.0f%% Fire rate" (a * 100)
+    show (MagazineCapacity a)  = printf "%+.0f%% Magazine capacity" (a * 100)
+    show (Multishot a)         = printf "%+.0f%% Multishot" (a * 100)
+    show (ReloadSpeed a)       = printf "%+.0f%% Reload speed" (a * 100)
+    show (Status a)            = printf "%+.0f%% Status chance" (a * 100)
 
 data Mod = Mod String [ModValue]
     deriving (Show)
