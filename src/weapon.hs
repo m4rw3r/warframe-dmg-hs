@@ -1,17 +1,19 @@
-module Weapon (
-    Weapon (..),
-    applyMods,
-    effectiveFireRate,
-    damagePerSecond,
-    damageProbabilities,
-    mostCommonDamagePerShot,
-    shotProbabilities,
-    Shot (..)
+module Weapon
+    (
+      Weapon (..)
+    , applyMods
+    , effectiveFireRate
+    , damagePerSecond
+    , damageProbabilities
+    , mostCommonDamagePerShot
+    , shotProbabilities
+    , Shot (..)
     ) where
 
 import Data.List (sort, maximumBy)
 import Data.Tuple (swap)
 import Control.Monad (liftM2)
+
 import qualified Numeric.Probability.Distribution as Dist
 
 import Damage
@@ -64,26 +66,35 @@ applyDamage w m = w { damage = mergeElementals $ sumByDamageType $ concat [p, e,
                                 t `elem` physical,
                                 t == t']
 
--- Why is this so ugly?
-applyAccuracy       :: Weapon -> [ModValue] -> Weapon
-applyCapacity       :: Weapon -> [ModValue] -> Weapon
-applyCritChance     :: Weapon -> [ModValue] -> Weapon
-applyCritMultiplier :: Weapon -> [ModValue] -> Weapon
-applyFireRate       :: Weapon -> [ModValue] -> Weapon
-applyMagazine       :: Weapon -> [ModValue] -> Weapon
-applyMultishot      :: Weapon -> [ModValue] -> Weapon
-applyReload         :: Weapon -> [ModValue] -> Weapon
-applyStatus         :: Weapon -> [ModValue] -> Weapon
-applyAccuracy w m       = w { accuracy       = sum1 [x | Accuracy x <- m] * accuracy w }
-applyCapacity w m       = w { capacity       = floor $ sum1 [x | Capacity x <- m] * fromIntegral (capacity w) }
-applyCritChance w m     = w { critChance     = sum1 [x | CritChance x <- m] * critChance w }
-applyCritMultiplier w m = w { critMultiplier = sum1 [x | CritMultiplier x <- m] * critMultiplier w }
-applyFireRate w m       = w { fireRate       = sum1 [x | FireRate x <- m] * fireRate w }
-applyMagazine w m       = w { magazine       = floor $ sum1 [x | MagazineCapacity x <- m] * fromIntegral (magazine w) }
-applyMultishot w m      = w { multishot      = sum [x | Multishot x <- m] + multishot w }
-applyReload w m         = w { reload         = reload w / sum1 [x | ReloadSpeed x <- m] }
-applyStatus w m         = w { status         = sum1 [x | Status x <- m] * status w }
+applyAccuracy :: Weapon -> [ModValue] -> Weapon
+applyAccuracy w m = w { accuracy = sum1 [x | Accuracy x <- m] * accuracy w }
 
+applyCapacity :: Weapon -> [ModValue] -> Weapon
+applyCapacity w m = w { capacity = floor $ sum1 [x | Capacity x <- m] * fromIntegral (capacity w) }
+
+applyCritChance :: Weapon -> [ModValue] -> Weapon
+applyCritChance w m = w { critChance = sum1 [x | CritChance x <- m] * critChance w }
+
+applyCritMultiplier :: Weapon -> [ModValue] -> Weapon
+applyCritMultiplier w m = w { critMultiplier = sum1 [x | CritMultiplier x <- m] * critMultiplier w }
+
+applyFireRate :: Weapon -> [ModValue] -> Weapon
+applyFireRate w m = w { fireRate = sum1 [x | FireRate x <- m] * fireRate w }
+
+applyMagazine :: Weapon -> [ModValue] -> Weapon
+applyMagazine w m = w { magazine = floor $ sum1 [x | MagazineCapacity x <- m] * fromIntegral (magazine w) }
+
+applyMultishot :: Weapon -> [ModValue] -> Weapon
+applyMultishot w m = w { multishot = sum [x | Multishot x <- m] + multishot w }
+
+applyReload :: Weapon -> [ModValue] -> Weapon
+applyReload w m = w { reload = reload w / sum1 [x | ReloadSpeed x <- m] }
+
+applyStatus :: Weapon -> [ModValue] -> Weapon
+applyStatus w m = w { status = sum1 [x | Status x <- m] * status w }
+
+-- | applyMods applies all the ModValue effects of the supplied list of Mod
+-- on the given weapon.
 applyMods :: Weapon -> [Mod] -> Weapon
 applyMods w m = foldl (\x y -> y x v) w fns
     where
@@ -131,7 +142,7 @@ data Shot = Shot [ShotEvent] | NoShot
 instance Eq Shot where
     Shot a == Shot b = and [e `elem` b | e <- a] && and [e `elem` a | e <- b]
     NoShot == NoShot = True
-    _ == _ = False
+    _ == _           = False
 
 -- | eventP will return a distribution of the possible occurances of e
 -- given the probability p, where p can be greater than 1.
@@ -140,18 +151,18 @@ instance Eq Shot where
 -- at least once, and that it can happen more than one time simultaneously.
 eventP :: ShotEvent -> Float -> Dist.T Float [ShotEvent]
 eventP e p | p < 1 = Dist.choose p [e] []
-eventP e p         = liftM2 (++) (Dist.certainly [e]) (eventP e (p - 1))
+eventP e p         = liftM2 (++) (Dist.certainly [e]) $ eventP e (p - 1)
 
 -- | shotDists is the distribution of crits and status procs on a single shot.
 shotDists :: Weapon -> Dist.T Float Shot
-shotDists w = Dist.map Shot (liftM2 (++) (eventP Critical (critChance w)) (eventP StatusProc (status w)))
+shotDists w = Dist.map Shot $ liftM2 (++) (eventP Critical $ critChance w) (eventP StatusProc $ status w)
 
 -- | multishotP is the probability of different numbers of shots fired from
 -- the weapon with one pull of the trigger, as well as the probability
 -- of different effects on the shots themselves.
 multishotP :: Weapon -> Float -> Dist.T Float [Shot]
-multishotP w p | p < 1 = Dist.map (: []) (Dist.unfold (Dist.choose p (shotDists w) (Dist.certainly NoShot)))
-multishotP w p = liftM2 (++) (Dist.map (: []) (shotDists w)) (multishotP w (p - 1))
+multishotP w p | p < 1 = Dist.map (: []) $ Dist.unfold $ Dist.choose p (shotDists w) (Dist.certainly NoShot)
+multishotP w p = liftM2 (++) (Dist.map (: []) $ shotDists w) (multishotP w (p - 1))
 
 -- | shotProbabilities is the possible outcomes of firing the weapon with a
 -- single pull of the trigger, in terms of number of shots, if they crit and/or
@@ -161,8 +172,8 @@ shotProbabilities w = Dist.lift Dist.sortP p
     where
         -- Sort the shots and then normalize, will merge occurences like
         -- (a, b) with (b, a); order does not matter
-        p = Dist.norm (Dist.map sort m)
-        m = multishotP w (1 + multishot w)
+        p = Dist.norm $ Dist.map sort m
+        m = multishotP w $ 1 + multishot w
 
 damageForShot :: Weapon -> Shot -> [Damage]
 damageForShot w (Shot a) = [Damage (d * m * s) t | Damage d t <- damage w]
@@ -173,7 +184,7 @@ damageForShot w (Shot a) = [Damage (d * m * s) t | Damage d t <- damage w]
         m = 1 + c * (critMultiplier w - 1)
         -- TODO: This is wrong, it is not straight up 2x damage on a single Damage,
         -- works as an approximation for few damage types however
-        s = 1 + sum [1 | StatusProc <- a] / fromIntegral (length (damage w))
+        s = 1 + sum [1 | StatusProc <- a] / fromIntegral (length $ damage w)
 damageForShot w _ = damage w
 
 damageForShots :: Weapon -> [Shot] -> [Damage]
@@ -185,5 +196,5 @@ damageProbabilities :: Weapon -> Dist.T Float [Damage]
 damageProbabilities w = Dist.map (damageForShots w) (shotProbabilities w)
 
 mostCommonDamagePerShot :: Weapon -> (Float, [Damage])
-mostCommonDamagePerShot w = swap $ maximumBy cmpSnd (Dist.decons (damageProbabilities w))
+mostCommonDamagePerShot w = swap $ maximumBy cmpSnd (Dist.decons $ damageProbabilities w)
 
