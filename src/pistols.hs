@@ -18,6 +18,20 @@ despair = Weapon {
     reload=0.8,
     status=0.025
     }
+hikouPrime :: Weapon
+hikouPrime = Weapon {
+    accuracy=1.0,
+    capacity=210,
+    critChance=0.05,
+    critMultiplier=1.5,
+    damage=[Damage 3.2 Impact, Damage 27.2 Puncture, Damage 1.6 Slash],
+    fireRate=5.8,
+    magazine=26,
+    multishot=0,
+    name="Hikou Prime",
+    reload=0.5,
+    status=0.15
+    }
 
 mods :: [Mod]
 mods = [
