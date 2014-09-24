@@ -1,31 +1,32 @@
 {-# LANGUAGE RecursiveDo #-}
 
 import Control.Monad (void, liftM)
+import Data.Function
+import qualified Data.ByteString.Char8 as BS
 import Data.List
 import Data.Maybe
 import Data.Monoid
 import Data.Vector (fromList, empty)
-import Text.Printf
-import qualified Data.ByteString.Char8 as BS
 import System.IO (hPutStrLn, stderr)
+import Text.Printf
 
 import Data.Aeson.Encode
 import Data.Aeson.Types as JSON
 import qualified Graphics.UI.Threepenny as UI
-import Graphics.UI.Threepenny.Core hiding (delete)
+import Graphics.UI.Threepenny.Core hiding (delete, on)
 import Math.Combinat.Sets (choose)
 import qualified Numeric.Probability.Distribution as Dist
 
 import Damage
 import Mod
-import Weapon
-import Utils
-import qualified Rifles
 import qualified Pistols
+import qualified Rifles
 import qualified Shotguns
+import Utils
+import Weapon
 
-tpConfig = Config
-    { tpPort = Nothing
+tpConfig = Config {
+      tpPort = Nothing
     , tpCustomHTML = Nothing
     , tpStatic = Just "wwwroot"
     , tpLog = \s -> BS.hPutStrLn stderr s
@@ -111,23 +112,27 @@ modListItem m = UI.li #+ [UI.p #+ [string $ modName $ modData m],
                           UI.p #+ [string $ intercalate ", " $ fmap show $ modValues $ modData m]]
 
 displayWeapon :: Weapon -> UI Element
-displayWeapon w = grid ([
-                    [UI.string (name w)],
-                    [UI.new # set html "&nbsp;"],
-                    [UI.string "Accuracy",            UI.string $ printf "%.0f"   $ 100 * accuracy w],
-                    [UI.string "Total ammo",          UI.string $ printf "%d"     $ capacity w],
-                    [UI.string "Critical chance",     UI.string $ printf "%.1f%%" $ 100 * critChance w],
-                    [UI.string "Critical multiplier", UI.string $ printf "%.2f"   $ critMultiplier w],
-                    [UI.string "Fire rate",           UI.string $ printf "%.2f"   $ fireRate w],
-                    [UI.string "Magazine size",       UI.string $ printf "%d"     $ magazine w],
-                    [UI.string "Multishot",           UI.string $ printf "%.0f%%" $ 100 * multishot w],
-                    [UI.string "Reload time",         UI.string $ printf "%.2f"   $ reload w],
-                    [UI.string "Status Chance",       UI.string $ printf "%.1f%%" $ 100 * status w],
-                    [UI.new # set html "&nbsp;"]
-                    ] ++ (fmap displayDamage (damage w)))
+displayWeapon w = grid $ [
+    [UI.string (name w)],
+    [UI.new # set html "&nbsp;"],
+    [UI.string "Accuracy",            UI.string $ printf "%.0f"   $ 100 * accuracy w],
+    [UI.string "Total ammo",          UI.string $ printf "%d"     $ capacity w],
+    [UI.string "Critical chance",     UI.string $ printf "%.1f%%" $ 100 * critChance w],
+    [UI.string "Critical multiplier", UI.string $ printf "%.2f"   $ critMultiplier w],
+    [UI.string "Fire rate",           UI.string $ printf "%.2f"   $ fireRate w],
+    [UI.string "Magazine size",       UI.string $ printf "%d"     $ magazine w],
+    [UI.string "Multishot",           UI.string $ printf "%.0f%%" $ 100 * multishot w],
+    [UI.string "Reload time",         UI.string $ printf "%.2f"   $ reload w],
+    [UI.string "Status Chance",       UI.string $ printf "%.1f%%" $ 100 * status w],
+    [UI.new # set html "&nbsp;"]
+    ] ++ (fmap displayDamage $ damage w)
 
 toPairs :: Dist.T Float [Damage] -> JSON.Value
-toPairs d = JSON.Array (fmap (\(x, y) -> JSON.Array (fromList [JSON.toJSON $ sumDamage x, JSON.toJSON y])) (fromList $ (sortBy (\(x1, _) (x2, _) -> compare x1 x2) (filter (\(x, y) -> y > 0) $ Dist.decons d))))
+toPairs d = JSON.Array $ fmap i $ fromList $ sortBy s $ filter f $ Dist.decons d
+  where
+    s = compare `on` fst
+    f (_, y) = y > 0
+    i (x, y) = JSON.Array $ fromList [JSON.toJSON $ sumDamage x, JSON.toJSON y]
 
 invokeGraph :: String -> JSON.Value -> JSFunction ()
 invokeGraph = ffi "$.plot(%1, [{data: %2, bars: { show: true, lineWidth: 5, fill: true}}], {yaxis: {min: 0.0}, xaxis: {min: 0.0}});"
