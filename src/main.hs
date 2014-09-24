@@ -52,7 +52,6 @@ main = print "test"
     >> putStrLn (probabilityToLine $ damageProbabilities $ applyMods Rifles.lanka mods2)
     >> print (mostCommonDamagePerShot $ applyMods Rifles.lanka mods2)
     >> print (mostCommonDamagePerShot $ applyMods Rifles.lanka mods)
-    >> print (length combos)
     -- >> mapM_ (putStrLn . resultToLine) ps
     -- >> mapM_ (putStrLn . resultToLine) ss
     >> mapM_ (putStrLn . resultToLine) ms
