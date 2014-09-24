@@ -3,6 +3,7 @@ module Weapon
       Weapon (..)
     , applyMods
     , effectiveFireRate
+    , averageShotDamage
     , damagePerSecond
     , damageProbabilities
     , mostCommonDamagePerShot
