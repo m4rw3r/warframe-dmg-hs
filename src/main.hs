@@ -58,10 +58,24 @@ setup window = void $ mdo
     dps            <- UI.p
     elChart        <- UI.div # set UI.id_ "dmg_probabilities" # set UI.height 400 # set UI.width 600
     
-    getBody window #+ [grid [
-            [UI.new #+ [string "Weapon type: ", element elSelType], UI.new #+ [string "Weapon: ", element elSelWeapon]],
-            [UI.new #+ [UI.new #+ [string "Mods: "], element elSelMods], element elChosenWeapon, element elChosenMods, element elModdedWeapon, UI.new #+ [element dps, element elChart]]
-            ]]
+    getBody window #+ [grid [[
+            UI.new #+ [string "Weapon type: ", element elSelType],
+            UI.new #+ [string "Weapon: ", element elSelWeapon]
+        ],
+        [
+            UI.new #+ [
+                UI.new #+ [string "Mods: "],
+                element elSelMods
+            ],
+            element elChosenWeapon,
+            element elChosenMods,
+            element elModdedWeapon,
+            UI.new #+ [
+                element dps,
+                UI.string "Damage probability per pull of the trigger",
+                element elChart
+            ]
+        ]]]
     
     -- events
     let eType    = UI.selectionChange elSelType
@@ -83,10 +97,10 @@ setup window = void $ mdo
         (bChecked, el) <- mkModList $ modsOfType w
         element elSelMods # set UI.children [] #+ [element el]
         
-        let bMods         = fmap modData <$> bChecked
-        let bModdedWeapon = bApplyMods <*> bMods
+        let bMods         = fmap modData         <$> bChecked
+        let bModdedWeapon = bApplyMods           <*> bMods
         let bDPS          = fmap damagePerSecond <$> bModdedWeapon
-        let bModList      = fmap modListItem <$> bChecked
+        let bModList      = fmap modListItem     <$> bChecked
         
         element dps # sink UI.text (show <$> bDPS)
         onChanges bModdedWeapon $ \w -> do
