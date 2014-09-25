@@ -29,7 +29,7 @@ tpConfig = Config {
       tpPort = Nothing
     , tpCustomHTML = Nothing
     , tpStatic = Just "wwwroot"
-    , tpLog = \s -> BS.hPutStrLn stderr s
+    , tpLog = BS.hPutStrLn stderr
     }
 
 main :: IO ()
@@ -69,18 +69,16 @@ setup window = void $ mdo
     let eWeapObj = bSelToWeapon <@> eWeapon
     
     -- behaviours
-    bWeaponType  <- fmap (selToWeaponType <$>) $ stepper Nothing eType
-    bApplyMods   <- fmap (maybeApplyMods  <$>) $ stepper Nothing eWeapObj
+    bWeaponType  <- fmap selToWeaponType <$> stepper Nothing eType
+    bApplyMods   <- fmap maybeApplyMods <$> stepper Nothing eWeapObj
     bWeapon      <- stepper Nothing eWeapObj
     
-    let bWeaponList  = (fmap weaponsOfType) <$> bWeaponType
-    let bModList     = modsOfType    <$> bWeaponType
-    let bSelToWeapon = selToWeapon   <$> bWeaponList
+    let bWeaponList  = fmap weaponsOfType <$> bWeaponType
+    let bModList     = modsOfType         <$> bWeaponType
+    let bSelToWeapon = selToWeapon        <$> bWeaponList
     
-    onChanges bWeapon $ \w -> do
-        element elChosenWeapon # set UI.children [] #+ case w of
-            Just w  -> [displayWeapon w]
-            Nothing -> [UI.new]
+    onChanges bWeapon $ \w ->
+        element elChosenWeapon # set UI.children [] #+ (displayWeapon <$> maybeToList w)
     onChanges bWeaponType $ \w -> do
         (bChecked, el) <- mkModList $ modsOfType w
         element elSelMods # set UI.children [] #+ [element el]
@@ -95,14 +93,12 @@ setup window = void $ mdo
             runFunction $ invokeGraph "#dmg_probabilities" $ case w of
                 Just w  -> toPairs $ damageProbabilities w
                 Nothing -> JSON.Array Data.Vector.empty
-            element elModdedWeapon # set UI.children [] #+ case w of
-                Just w  -> [displayWeapon w]
-                Nothing -> [UI.new]
-        onChanges bModList $ \m -> do
+            element elModdedWeapon # set UI.children [] #+ (displayWeapon <$> maybeToList w)
+        onChanges bModList $ \m ->
             element elChosenMods # set UI.children [] #+ m
     
-    onChanges bWeaponList $ \w -> do
-        element elSelWeapon # set UI.children [] #+ ([UI.option #+ [string "Select Weapon"]] ++ (weaponOption <$> (fromMaybe [] w)))
+    onChanges bWeaponList $ \w ->
+        element elSelWeapon # set UI.children [] #+ ((UI.option #+ [string "Select Weapon"]) : (weaponOption <$> fromMaybe [] w))
 
 weaponOption :: Weapon -> UI Element
 weaponOption w = UI.option # set UI.id_ (name w) #+ [string $ name w]
@@ -125,7 +121,7 @@ displayWeapon w = grid $ [
     [UI.string "Reload time",         UI.string $ printf "%.2f"   $ reload w],
     [UI.string "Status Chance",       UI.string $ printf "%.1f%%" $ 100 * status w],
     [UI.new # set html "&nbsp;"]
-    ] ++ (fmap displayDamage $ damage w)
+    ] ++ (displayDamage <$> damage w)
 
 toPairs :: Dist.T Float [Damage] -> JSON.Value
 toPairs d = JSON.Array $ fmap i $ fromList $ sortBy s $ filter f $ Dist.decons d
@@ -140,9 +136,9 @@ invokeGraph = ffi "$.plot(%1, [{data: %2, bars: { show: true, lineWidth: 5, fill
 displayDamage :: Damage -> [UI Element]
 displayDamage (Damage d t) = [UI.string $ show t, UI.string $ printf "%.1f" d]
 
-maybeApplyMods :: Maybe Weapon -> ([Mod] -> Maybe Weapon)
-maybeApplyMods (Just w) = \m -> Just $ applyMods w m
-maybeApplyMods _        = \_ -> Nothing
+maybeApplyMods :: Maybe Weapon -> [Mod] -> Maybe Weapon
+maybeApplyMods (Just w) = Just . applyMods w
+maybeApplyMods _        = const Nothing
 
 data ModChecked = ModChecked {
     modData    :: Mod,
@@ -153,7 +149,7 @@ data ModChecked = ModChecked {
 accumModChecked :: [ModChecked] -> [ModChecked] -> [ModChecked]
 accumModChecked a b = filter modChecked $ l ++ a
     where
-        l = deleteFirstsBy (\x y -> modData x == modData y) b a
+        l = deleteFirstsBy ((==) `on` modData) b a
 
 mkModList :: [Mod] -> UI (Behavior [ModChecked], Element)
 mkModList m = do
@@ -175,18 +171,16 @@ mkModCheckbox m = do
     elLabel    <- UI.div #+ [mkElement "label" #+ [element elCheckbox, string (modName m)]]
     
     let eChecked = UI.checkedChange elCheckbox
-        eMod     = fmap (\x -> case x of
-            True  -> ModChecked m True
-            False -> ModChecked m False) eChecked
+        eMod     = fmap (ModChecked m) eChecked
    
     return (eMod, elLabel)
 
 checkedModName :: Element -> UI String
 checkedModName e = do
     v <- e # get UI.checked
-    case v of
-        True  -> e # get UI.value
-        False -> return ""
+    if v
+        then e # get UI.value
+        else return ""
 
 data WeaponType = Rifle | Shotgun | Pistol | None
     deriving (Show)
