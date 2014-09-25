@@ -211,7 +211,7 @@ modsOfType Nothing        = []
 weaponsOfType :: WeaponType -> [Weapon]
 weaponsOfType Rifle   = [Rifles.dread, Rifles.lanka, Rifles.snipetronVandal, Rifles.synapse, Rifles.vulkar]
 weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged]
-weaponsOfType Pistol  = [Pistols.despair]
+weaponsOfType Pistol  = [Pistols.despair, Pistols.hikouPrime]
 weaponsOfType None    = []
 
 addScriptTag :: UI.Window -> String -> UI ()
