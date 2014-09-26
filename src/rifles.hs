@@ -4,6 +4,20 @@ import Weapon
 import Damage
 import Mod
 
+boltorPrime :: Weapon
+boltorPrime = Weapon {
+    accuracy=0.5,
+    capacity=540,
+    critChance=0.05,
+    critMultiplier=2.0,
+    damage=[Damage 5.5 Impact, Damage 49.5 Puncture],
+    fireRate=10.0,
+    magazine=60,
+    multishot=0,
+    name="Boltor Prime",
+    reload=2.4,
+    status=0.10
+    }
 dread :: Weapon
 dread = Weapon {
     accuracy=1.0,
@@ -31,6 +45,20 @@ lanka = Weapon {
     name="Lanka",
     reload=2.0,
     status=0.25
+    }
+latronWraith :: Weapon
+latronWraith = Weapon {
+    accuracy=0.286,
+    capacity=540,
+    critChance=0.25,
+    critMultiplier=2.5,
+    damage=[Damage 13.8 Impact, Damage 38.5 Puncture, Damage 2.7 Slash],
+    fireRate=5.4,
+    magazine=15,
+    multishot=0,
+    name="Latron Wraith",
+    reload=2.4,
+    status=0.20
     }
 snipetronVandal  :: Weapon
 snipetronVandal = Weapon {

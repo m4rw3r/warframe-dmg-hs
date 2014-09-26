@@ -32,6 +32,20 @@ drakgoonUncharged = Weapon {
     reload=2.3,
     status=0.10
     }
+phage :: Weapon
+phage = Weapon {
+    accuracy=0.5,
+    capacity=120,
+    critChance=0.075,
+    critMultiplier=2.0,
+    damage=[Damage 330 Viral],
+    fireRate=1.0,
+    magazine=40,
+    multishot=0,
+    name="Phage",
+    reload=2.0,
+    status=0.10
+    }
 
 mods :: [Mod]
 mods = [

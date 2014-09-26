@@ -32,6 +32,34 @@ hikouPrime = Weapon {
     reload=0.5,
     status=0.15
     }
+lexPrime :: Weapon
+lexPrime = Weapon {
+    accuracy=0.16,
+    capacity=210,
+    critChance=0.20,
+    critMultiplier=2.0,
+    damage=[Damage 8.5 Impact, Damage 68.0 Puncture, Damage 8.5 Slash],
+    fireRate=2.1,
+    magazine=8,
+    multishot=0,
+    name="Lex Prime",
+    reload=2.3,
+    status=0.20
+    }
+wraithTwinVipers :: Weapon
+wraithTwinVipers = Weapon {
+    accuracy=0.111,
+    capacity=210,
+    critChance=0.18,
+    critMultiplier=2.0,
+    damage=[Damage 14.4 Impact, Damage 1.8 Puncture, Damage 1.8 Slash],
+    fireRate=25.0,
+    magazine=40,
+    multishot=0,
+    name="Wraith Twin Vipers",
+    reload=2.0,
+    status=0.05
+    }
 
 mods :: [Mod]
 mods = [
