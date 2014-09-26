@@ -32,7 +32,7 @@ resultToLine :: (Float, [Mod]) -> String
 resultToLine (v, m) = show v ++ ": " ++ intercalate ", " (map modName m)
 
 probabilityToLine :: (Show a, Ord a) => Dist.T Float a -> String
-probabilityToLine p = Dist.pretty (printf "%2.2f%%") p
+probabilityToLine = Dist.pretty (printf "%2.2f%%")
 
 main :: IO ()
 main = print "test"
