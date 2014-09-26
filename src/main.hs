@@ -217,9 +217,9 @@ modsOfType (Just Pistol)  = Pistols.mods
 modsOfType Nothing        = []
 
 weaponsOfType :: WeaponType -> [Weapon]
-weaponsOfType Rifle   = [Rifles.dread, Rifles.lanka, Rifles.snipetronVandal, Rifles.synapse, Rifles.vulkar]
-weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged]
-weaponsOfType Pistol  = [Pistols.despair, Pistols.hikouPrime]
+weaponsOfType Rifle   = [Rifles.boltorPrime, Rifles.dread, Rifles.lanka, Rifles.latronWraith, Rifles.snipetronVandal, Rifles.synapse, Rifles.vulkar, Rifles.vectis]
+weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged, Shotguns.phage]
+weaponsOfType Pistol  = [Pistols.despair, Pistols.hikouPrime, Pistols.lexPrime, Pistols.wraithTwinVipers]
 weaponsOfType None    = []
 
 addScriptTag :: UI.Window -> String -> UI ()
