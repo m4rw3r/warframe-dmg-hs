@@ -18,6 +18,20 @@ despair = Weapon {
     reload=0.8,
     status=0.025
     }
+embolist :: Weapon
+embolist = Weapon {
+    accuracy=1.0,
+    capacity=210,
+    critChance=0.025,
+    critMultiplier=2,
+    damage=[Damage 18.5 Toxic],
+    fireRate=10,
+    magazine=10,
+    multishot=0,
+    name="Embolist",
+    reload=1.5,
+    status=0.01
+    }
 hikouPrime :: Weapon
 hikouPrime = Weapon {
     accuracy=1.0,

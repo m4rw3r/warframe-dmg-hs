@@ -32,6 +32,20 @@ dread = Weapon {
     reload=1.0,
     status=0.20
     }
+glaxion :: Weapon
+glaxion = Weapon {
+    accuracy=0.125,
+    capacity=1500,
+    critChance=0.05,
+    critMultiplier=2.0,
+    damage=[Damage 12.5 Cold],
+    fireRate=20.0,
+    magazine=300,
+    multishot=0,
+    name="Glaxion",
+    reload=1.5,
+    status=0.04
+    }
 lanka  :: Weapon
 lanka = Weapon {
     accuracy=1.0,
@@ -60,6 +74,34 @@ latronWraith = Weapon {
     reload=2.4,
     status=0.20
     }
+quanta :: Weapon
+quanta = Weapon {
+    accuracy=1.0,
+    capacity=540,
+    critChance=0.10,
+    critMultiplier=2.0,
+    damage=[Damage 220 Electricity],
+    fireRate=1.0,
+    magazine=60,
+    multishot=0,
+    name="Quanta",
+    reload=2.0,
+    status=0.1
+    }
+quantaDetonate :: Weapon
+quantaDetonate = Weapon {
+    accuracy=1.0,
+    capacity=540,
+    critChance=0.10,
+    critMultiplier=2.0,
+    damage=[Damage 400 Blast],
+    fireRate=1.0,
+    magazine=5,
+    multishot=0,
+    name="Quanta",
+    reload=2.0,
+    status=0.1
+    }
 snipetronVandal  :: Weapon
 snipetronVandal = Weapon {
     accuracy=0.133,
@@ -86,6 +128,20 @@ synapse = Weapon {
     multishot=0,
     name="Synapse",
     reload=1.0,
+    status=0.025
+    }
+tiberion :: Weapon
+tiberion = Weapon {
+    accuracy=0.333,
+    capacity=540,
+    critChance=0.05,
+    critMultiplier=2,
+    damage=[Damage 15 Slash, Damage 30 Puncture, Damage 15 Impact],
+    fireRate=6.7,
+    magazine=30,
+    multishot=0,
+    name="Tiberion",
+    reload=2.3,
     status=0.025
     }
 vectis :: Weapon
