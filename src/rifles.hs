@@ -25,11 +25,11 @@ dread = Weapon {
     critChance=0.50,
     critMultiplier=2.0,
     damage=[Damage 10 Impact, Damage 10 Puncture, Damage 180 Slash],
-    fireRate=1.0,
+    fireRate=0.5,
     magazine=1,
     multishot=0,
     name="Dread",
-    reload=1.0,
+    reload=0.8,
     status=0.20
     }
 glaxion :: Weapon
