@@ -74,6 +74,20 @@ latronWraith = Weapon {
     reload=2.4,
     status=0.20
     }
+opticor :: Weapon
+opticor = Weapon {
+    accuracy=1.0,
+    capacity=540,
+    critChance=0.10,
+    critMultiplier=2.0,
+    damage=[Damage 25 Slash, Damage 425 Puncture, Damage 50 Slash],
+    fireRate=0.3,
+    magazine=5,
+    multishot=0,
+    name="Opticor",
+    reload=2.0,
+    status=0.15
+    }
 quanta :: Weapon
 quanta = Weapon {
     accuracy=1.0,
@@ -101,6 +115,20 @@ quantaDetonate = Weapon {
     name="Quanta",
     reload=2.0,
     status=0.1
+    }
+soma :: Weapon
+soma = Weapon {
+    accuracy=0.286,
+    capacity=540,
+    critChance=0.3,
+    critMultiplier=3,
+    damage=[Damage 5 Slash, Damage 4 Puncture, Damage 1 Impact],
+    fireRate=15,
+    magazine=100,
+    multishot=0,
+    name="Soma",
+    reload=3,
+    status=0.07
     }
 snipetronVandal  :: Weapon
 snipetronVandal = Weapon {
