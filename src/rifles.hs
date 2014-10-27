@@ -18,6 +18,20 @@ boltorPrime = Weapon {
     reload=2.4,
     status=0.10
     }
+bratonPrime :: Weapon
+bratonPrime = Weapon {
+    accuracy=0.286,
+    capacity=540,
+    critChance=0.1,
+    critMultiplier=1.5,
+    damage=[Damage 1.3 Impact, Damage 8.8 Puncture, Damage 15 Slash],
+    fireRate=8.8,
+    magazine=50,
+    multishot=0,
+    name="Braton Prime",
+    reload=2.2,
+    status=0.1
+    }
 dread :: Weapon
 dread = Weapon {
     accuracy=1.0,
@@ -59,6 +73,20 @@ lanka = Weapon {
     name="Lanka",
     reload=2.0,
     status=0.25
+    }
+latron :: Weapon
+latron = Weapon {
+    accuracy=0.286,
+    capacity=540,
+    critChance=0.1,
+    critMultiplier=2,
+    damage=[Damage 8 Impact, Damage 38 Puncture, Damage 8 Slash],
+    fireRate=4.2,
+    magazine=15,
+    multishot=0,
+    name="Latron",
+    reload=2.4,
+    status=0.1
     }
 latronWraith :: Weapon
 latronWraith = Weapon {
