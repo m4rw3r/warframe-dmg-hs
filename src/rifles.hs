@@ -106,7 +106,7 @@ opticor :: Weapon
 opticor = Weapon {
     accuracy=1.0,
     capacity=540,
-    critChance=0.10,
+    critChance=0.15,
     critMultiplier=2.0,
     damage=[Damage 25 Slash, Damage 425 Puncture, Damage 50 Slash],
     fireRate=0.3,
