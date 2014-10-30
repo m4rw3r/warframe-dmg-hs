@@ -217,7 +217,7 @@ modsOfType (Just Pistol)  = Pistols.mods
 modsOfType Nothing        = []
 
 weaponsOfType :: WeaponType -> [Weapon]
-weaponsOfType Rifle   = [Rifles.boltorPrime, Rifles.dread, Rifles.lanka, Rifles.latronWraith, Rifles.snipetronVandal, Rifles.synapse, Rifles.vulkar, Rifles.vectis]
+weaponsOfType Rifle   = [Rifles.boltorPrime, Rifles.dread, Rifles.lanka, Rifles.latronWraith, Rifles.opticor, Rifles.snipetronVandal, Rifles.synapse, Rifles.vulkar, Rifles.vectis]
 weaponsOfType Shotgun = [Shotguns.drakgoonUncharged, Shotguns.drakgoonCharged, Shotguns.phage]
 weaponsOfType Pistol  = [Pistols.despair, Pistols.hikouPrime, Pistols.lexPrime, Pistols.wraithTwinVipers]
 weaponsOfType None    = []
