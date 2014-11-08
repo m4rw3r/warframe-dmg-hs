@@ -3,6 +3,11 @@ module Mod where
 import Data.List (find)
 import Text.Printf
 import qualified Damage (Type)
+import WeaponType
+
+data ModRequirement =
+    ModType WeaponType
+        deriving (Show, Eq)
 
 data ModValue =
     Accuracy Float
@@ -31,20 +36,20 @@ instance Show ModValue where
     show (ReloadSpeed a)       = printf "%+.0f%% Reload speed" (a * 100)
     show (Status a)            = printf "%+.0f%% Status chance" (a * 100)
 
-data Mod = Mod String [ModValue]
+data Mod = Mod String [ModRequirement] [ModValue]
     deriving (Show)
 
 instance Eq Mod where
-    Mod _ v == Mod _ v2 = v == v2
+    Mod _ r v == Mod _ r2 v2 = r == r2 && v == v2
 
 instance Ord Mod where
-    Mod a _ <= Mod b _ = a <= b
+    Mod a _ _ <= Mod b _ _ = a <= b
 
 modName :: Mod -> String
-modName (Mod n _) = n
+modName (Mod n _ _) = n
 
 modValues :: Mod -> [ModValue]
-modValues (Mod _ v) = v
+modValues (Mod _ _ v) = v
 
 modByName :: String -> [Mod] -> Maybe Mod
 modByName n = find (\x -> modName x == n)

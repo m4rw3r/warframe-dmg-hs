@@ -1,9 +1,23 @@
-module Rifles where
+module Weapons.Rifles where
 
 import Weapon
 import Damage
-import Mod
 
+amprex :: Weapon
+amprex = Weapon {
+    accuracy=1.0,
+    capacity=540,
+    critChance=0.5,
+    critMultiplier=2.0,
+    damage=[Damage 7.5 Electricity],
+    fireRate=20,
+    magazine=100,
+    multishot=0,
+    name="Amprex",
+    reload=2.7,
+    status=0.011,
+    weaponType=Rifle
+    }
 boltorPrime :: Weapon
 boltorPrime = Weapon {
     accuracy=0.5,
@@ -16,7 +30,8 @@ boltorPrime = Weapon {
     multishot=0,
     name="Boltor Prime",
     reload=2.4,
-    status=0.10
+    status=0.10,
+    weaponType=Rifle
     }
 bratonPrime :: Weapon
 bratonPrime = Weapon {
@@ -30,7 +45,8 @@ bratonPrime = Weapon {
     multishot=0,
     name="Braton Prime",
     reload=2.2,
-    status=0.1
+    status=0.1,
+    weaponType=Rifle
     }
 dread :: Weapon
 dread = Weapon {
@@ -44,7 +60,8 @@ dread = Weapon {
     multishot=0,
     name="Dread",
     reload=0.8,
-    status=0.20
+    status=0.20,
+    weaponType=Bow
     }
 glaxion :: Weapon
 glaxion = Weapon {
@@ -58,7 +75,8 @@ glaxion = Weapon {
     multishot=0,
     name="Glaxion",
     reload=1.5,
-    status=0.04
+    status=0.04,
+    weaponType=Rifle
     }
 lanka  :: Weapon
 lanka = Weapon {
@@ -72,7 +90,8 @@ lanka = Weapon {
     multishot=0,
     name="Lanka",
     reload=2.0,
-    status=0.25
+    status=0.25,
+    weaponType=Sniper
     }
 latron :: Weapon
 latron = Weapon {
@@ -86,7 +105,8 @@ latron = Weapon {
     multishot=0,
     name="Latron",
     reload=2.4,
-    status=0.1
+    status=0.1,
+    weaponType=Rifle
     }
 latronWraith :: Weapon
 latronWraith = Weapon {
@@ -100,7 +120,8 @@ latronWraith = Weapon {
     multishot=0,
     name="Latron Wraith",
     reload=2.4,
-    status=0.20
+    status=0.20,
+    weaponType=Rifle
     }
 opticor :: Weapon
 opticor = Weapon {
@@ -108,13 +129,16 @@ opticor = Weapon {
     capacity=540,
     critChance=0.15,
     critMultiplier=2.0,
-    damage=[Damage 25 Slash, Damage 425 Puncture, Damage 50 Slash],
+    damage=[Damage 50 Slash, Damage 850 Puncture, Damage 100 Impact],
+    -- damage=[Damage 25 Slash, Damage 425 Puncture, Damage 50 Impact],
     fireRate=0.3,
+    -- fireRate=0.6,
     magazine=5,
     multishot=0,
     name="Opticor",
     reload=2.0,
-    status=0.15
+    status=0.15,
+    weaponType=Rifle
     }
 quanta :: Weapon
 quanta = Weapon {
@@ -128,7 +152,8 @@ quanta = Weapon {
     multishot=0,
     name="Quanta",
     reload=2.0,
-    status=0.1
+    status=0.1,
+    weaponType=Rifle
     }
 quantaDetonate :: Weapon
 quantaDetonate = Weapon {
@@ -142,7 +167,8 @@ quantaDetonate = Weapon {
     multishot=0,
     name="Quanta",
     reload=2.0,
-    status=0.1
+    status=0.1,
+    weaponType=Rifle
     }
 soma :: Weapon
 soma = Weapon {
@@ -156,7 +182,8 @@ soma = Weapon {
     multishot=0,
     name="Soma",
     reload=3,
-    status=0.07
+    status=0.07,
+    weaponType=Rifle
     }
 snipetronVandal  :: Weapon
 snipetronVandal = Weapon {
@@ -170,7 +197,8 @@ snipetronVandal = Weapon {
     multishot=0,
     name="Snipetron Vandal",
     reload=2.0,
-    status=0.25
+    status=0.25,
+    weaponType=Sniper
     }
 synapse  :: Weapon
 synapse = Weapon {
@@ -184,7 +212,8 @@ synapse = Weapon {
     multishot=0,
     name="Synapse",
     reload=1.0,
-    status=0.025
+    status=0.025,
+    weaponType=Rifle
     }
 tiberion :: Weapon
 tiberion = Weapon {
@@ -198,7 +227,8 @@ tiberion = Weapon {
     multishot=0,
     name="Tiberion",
     reload=2.3,
-    status=0.025
+    status=0.025,
+    weaponType=Rifle
     }
 vectis :: Weapon
 vectis = Weapon {
@@ -212,7 +242,8 @@ vectis = Weapon {
     multishot=0,
     name="Vectis",
     reload=0.9,
-    status=0.30
+    status=0.30,
+    weaponType=Sniper
     }
 vulkar :: Weapon
 vulkar = Weapon {
@@ -226,36 +257,6 @@ vulkar = Weapon {
     multishot=0,
     name="Vulkar",
     reload=3.0,
-    status=0.25
+    status=0.25,
+    weaponType=Sniper
     }
-
-mods :: [Mod]
-mods = [
-    Mod "Ammo Drum"         [Capacity 0.3],
-    Mod "Critical Delay"    [CritChance 0.48, FireRate (-0.36)],
-    Mod "Cryo Rounds"       [ElementalDamage 0.9 Cold],
-    Mod "Fast Hands"        [ReloadSpeed 0.3],
-    Mod "Hammershot"        [CritMultiplier 0.6, Status 0.4],
-    Mod "Heavy Caliber"     [AnyDamage 1.65, Accuracy (-0.5)],
-    Mod "Hellfire"          [ElementalDamage 0.9 Heat],
-    Mod "High Voltage"      [ElementalDamage 0.6 Electricity, Status 0.6],
-    Mod "Infected Clip"     [ElementalDamage 0.9 Toxic],
-    Mod "Magazine Warp"     [MagazineCapacity 0.3],
-    Mod "Malignant Force"   [ElementalDamage 0.6 Toxic, Status 0.6],
-    Mod "Piercing Hit"      [ElementalDamage 0.3 Puncture],
-    Mod "Point Strike"      [CritChance 1.5],
-    Mod "Rifle Aptitude"    [Status 0.15],
-    Mod "Rime Rounds"       [ElementalDamage 0.6 Cold, Status 0.6],
-    Mod "Rupture"           [ElementalDamage 0.3 Impact],
-    Mod "Sawtooth Clip"     [ElementalDamage 0.3 Slash],
-    Mod "Serration"         [AnyDamage 1.65],
-    Mod "Shred"             [FireRate 0.3], -- Add punch-through
-    Mod "Speed Trigger"     [FireRate 0.6],
-    Mod "Split Chamber"     [Multishot 0.9],
-    Mod "Stormbringer"      [ElementalDamage 0.9 Electricity],
-    Mod "Tainted Mag"       [MagazineCapacity 0.66, ReloadSpeed (-0.33)],
-    Mod "Thermite Rounds"   [ElementalDamage 0.6 Heat, Status 0.6],
-    Mod "Vital Sense"       [CritMultiplier 1.2],
-    Mod "Vile Acceleration" [FireRate 0.9, AnyDamage (-0.125)],
-    Mod "Wildfire"          [MagazineCapacity 0.2, ElementalDamage 0.6 Heat]
-    ]

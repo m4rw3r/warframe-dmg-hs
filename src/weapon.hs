@@ -1,6 +1,7 @@
 module Weapon
     (
       Weapon (..)
+    , WeaponType (..)
     , applyMods
     , effectiveFireRate
     , averageShotDamage
@@ -20,6 +21,7 @@ import qualified Numeric.Probability.Distribution as Dist
 import Damage
 import Mod
 import Utils
+import WeaponType
 
 data Weapon =
     Weapon {
@@ -33,7 +35,8 @@ data Weapon =
         multishot      :: Float,
         name           :: String,
         reload         :: Float,
-        status         :: Float
+        status         :: Float,
+        weaponType     :: WeaponType
     }
     deriving (Show)
 
