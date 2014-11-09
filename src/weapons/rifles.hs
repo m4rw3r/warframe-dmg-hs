@@ -78,6 +78,36 @@ glaxion = Weapon {
     status=0.04,
     weaponType=Rifle
     }
+grakata :: Weapon
+grakata = Weapon {
+    accuracy=0.286,
+    capacity=800,
+    critChance=0.25,
+    critMultiplier=2,
+    damage=[Damage 2.9 Slash, Damage 3.7 Puncture, Damage 4.4 Impact],
+    fireRate=20,
+    magazine=60,
+    multishot=0,
+    name="Grakata",
+    reload=2.4,
+    status=0.2,
+    weaponType=Rifle
+    }
+karak :: Weapon
+karak = Weapon {
+    accuracy=0.286,
+    capacity=540,
+    critChance=0.025,
+    critMultiplier=1.5,
+    damage=[Damage 6.8 Slash, Damage 8.1 Puncture, Damage 12.1 Impact],
+    fireRate=11.7,
+    magazine=30,
+    multishot=0,
+    name="Karak",
+    reload=2.0,
+    status=0.075,
+    weaponType=Rifle
+    }
 lanka  :: Weapon
 lanka = Weapon {
     accuracy=1.0,

@@ -48,6 +48,21 @@ drakgoonUncharged = Weapon {
     status=0.10,
     weaponType=Shotgun
     }
+hek :: Weapon
+hek = Weapon {
+    accuracy=0.091,
+    capacity=120,
+    critChance=0.1,
+    critMultiplier=2,
+    damage=[Damage 35 Slash, Damage 113.8 Puncture, Damage 26.3 Impact],
+    fireRate=2.2,
+    magazine=4,
+    multishot=0,
+    name="Hek",
+    reload=2.2,
+    status=0.25,
+    weaponType=Shotgun
+    }
 phage :: Weapon
 phage = Weapon {
     accuracy=0.5,
