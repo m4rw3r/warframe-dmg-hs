@@ -10,6 +10,7 @@ conditionAppliesOn w (ModType t) = case (t, weaponType w) of
     (Rifle, Sniper) -> True
     (Rifle, Bow)    -> True
     (a, b)          -> a == b
+conditionAppliesOn w (WeaponName n) = n == name w
 
 canApplyOn :: Weapon -> Mod -> Bool
 canApplyOn w (Mod _ r _) = all (conditionAppliesOn w) r
@@ -93,6 +94,7 @@ mods = [
     Mod "Incendiary Coat"    [ModType Shotgun] [ElementalDamage 0.9 Heat],
     Mod "Point Blank"        [ModType Shotgun] [AnyDamage 0.9],
     Mod "Ravage"             [ModType Shotgun] [CritMultiplier 0.6],
+    Mod "Scattered Justice"  [ModType Shotgun, WeaponName "Hek"] [Multishot 2],
     Mod "Scattering Inferno" [ModType Shotgun] [ElementalDamage 0.6 Heat, Status 0.6],
     Mod "Shell Shock"        [ModType Shotgun] [ElementalDamage 0.6 Electricity, Status 0.6],
     Mod "Shotgun Savvy"      [ModType Shotgun] [Status 0.3],

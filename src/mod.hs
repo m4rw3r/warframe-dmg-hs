@@ -7,6 +7,7 @@ import WeaponType
 
 data ModRequirement =
     ModType WeaponType
+    | WeaponName String
         deriving (Show, Eq)
 
 data ModValue =
