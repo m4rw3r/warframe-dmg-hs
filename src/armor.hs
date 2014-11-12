@@ -93,18 +93,14 @@ modifierForDamageOnArmor _                  _             =  0
 enemyArmor :: Int -> Int -> Int -> Int
 enemyArmor a b l = floor $ fromIntegral a * (1 + ((fromIntegral (l - b) ** 1.75) / 200))
 
-armorReduction :: Int -> Float
-armorReduction a = 1 / (1 + (fromIntegral a / 300))
-
--- |damageModifier is the factor for a given type of damage d versus a given type of
--- armor a with a damage reduction r. Health-type damages have a reduction of 0
--- making them linear.
+-- |damageModifier is the factor for armor type t given type of damage d versus t given 
+-- an armor value a. Health-type damages have a reduction of 0 making them constant.
 damageModifier :: Damage.Type -> Float -> Armor -> Float
-damageModifier d r a = (1 + modifierForDamageOnArmor d a) * 300 / (300 + r * (1 - modifierForDamageOnArmor d a))
+damageModifier d a t = (1 + modifierForDamageOnArmor d t) * 300 / (300 + a * (1 - modifierForDamageOnArmor d t))
 
 -- |damageOnEnemy calculates the damage applied on a specific enemy given a level l and a
 -- list of damages d.
 damageOnEnemy :: Enemy -> Int -> [Damage.Damage] -> [Damage.Damage]
 damageOnEnemy (Enemy a b) l d = [Damage.Damage (n * product (fmap (\(at, r) -> damageModifier t r at) r)) t | Damage.Damage n t <- d]
     where
-        r = fmap (\(ArmorValue a n) -> (a, armorReduction $ enemyArmor n b l)) a
+        r = [(a, fromIntegral $ enemyArmor v b l) | ArmorValue a v <- a]
