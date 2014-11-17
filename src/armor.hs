@@ -91,7 +91,7 @@ modifierForDamageOnArmor _                  _             =  0
 -- |enemyArmor gives the armor value for any given enemy with the base armor a,
 -- base level b and current level l.
 enemyArmor :: Int -> Int -> Int -> Int
-enemyArmor a b l = floor $ fromIntegral a * (1 + ((fromIntegral (l - b) ** 1.75) / 200))
+enemyArmor a b l = floor $ fromIntegral a * (1 + ((fromIntegral (l - b) ** 1.75) / 200) :: Double)
 
 -- |damageModifier is the factor for armor type t given type of damage d versus t given 
 -- an armor value a. Health-type damages have a reduction of 0 making them constant.
@@ -101,6 +101,7 @@ damageModifier d a t = (1 + modifierForDamageOnArmor d t) * 300 / (300 + a * (1 
 -- |damageOnEnemy calculates the damage applied on a specific enemy given a level l and a
 -- list of damages d.
 damageOnEnemy :: Enemy -> Int -> [Damage.Damage] -> [Damage.Damage]
-damageOnEnemy (Enemy a b) l d = [Damage.Damage (n * product (fmap (\(at, r) -> damageModifier t r at) r)) t | Damage.Damage n t <- d]
+damageOnEnemy (Enemy a b) l d = [Damage.Damage (n * product (fmap (\(at, r) -> damageModifier t r at) reductions)) t | Damage.Damage n t <- d]
     where
-        r = [(a, fromIntegral $ enemyArmor v b l) | ArmorValue a v <- a]
+        reductions = [(at, fromIntegral $ enemyArmor v b l) | ArmorValue at v <- a]
+

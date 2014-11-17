@@ -189,7 +189,7 @@ damageForShot w (Shot a) = [Damage (d * m * s) t | Damage d t <- damage w]
         -- TODO: This is wrong, it is not straight up 2x damage on a single Damage,
         -- works as an approximation for few damage types however
         s = 1 + sum [1 | StatusProc <- a] / fromIntegral (length $ damage w)
-damageForShot w _ = []
+damageForShot _ _ = []
 
 damageForShots :: Weapon -> [Shot] -> [Damage]
 damageForShots w s = sumByDamageType $ concatMap (damageForShot w) s
