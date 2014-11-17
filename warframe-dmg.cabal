@@ -43,6 +43,7 @@ cabal-version:       >=1.8
 
 
 executable warframe-dmg
+  ghc-options:         -W -Wall -fwarn-tabs -fwarn-incomplete-uni-patterns
   -- .hs or .lhs file containing the Main module.
   main-is:             main.hs
   
