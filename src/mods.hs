@@ -1,9 +1,13 @@
-module Mods (modsFor) where
+module Mods (
+    modsFor
+  , modByName
+  , forceModsByNames
+  ) where
 
+import Data.List (find)
 import Damage
 import Mod
 import Weapon
-import WeaponType
 
 conditionAppliesOn :: Weapon -> ModRequirement -> Bool
 conditionAppliesOn w (ModType t) = case (t, weaponType w) of
@@ -17,6 +21,28 @@ canApplyOn w (Mod _ r _) = all (conditionAppliesOn w) r
 
 modsFor :: Weapon -> [Mod]
 modsFor w = filter (canApplyOn w) mods
+
+modByName :: String -> Maybe Mod
+modByName n = find (\x -> modName x == n) mods
+
+-- | modsByNames will find the matching Mod instances of the given list of strings.
+-- Gives the name of the mod in case the mod cannot be found.
+-- 
+-- The resulting list of Mods will be ordered in the same order as the list of
+-- mod names.
+modsByNames :: [String] -> Either String [Mod]
+modsByNames []     = Right []
+modsByNames (x:xs) = case (find (\y -> modName y == x) mods, modsByNames xs) of
+    (Just z, Right zs) -> Right (z : zs)
+    (Just _, Left zs)  -> Left zs
+    (Nothing, _)       -> Left x
+
+-- | forceModsByNames is modsByNames but will raise an error in case any mod in
+-- the given list cannot be found.
+forceModsByNames :: [String] -> [Mod]
+forceModsByNames n = case modsByNames n of
+    Right x -> x
+    Left  x -> error $ "Mod not found: " ++ x
 
 mods :: [Mod]
 mods = [
