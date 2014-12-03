@@ -48,6 +48,21 @@ bratonPrime = Weapon {
     status=0.1,
     weaponType=Rifle
     }
+dera :: Weapon
+dera = Weapon {
+    accuracy=1,
+    capacity=540,
+    critChance=0.025,
+    critMultiplier=1.5,
+    damage=[Damage 1.1 Slash, Damage 16.5 Puncture, Damage 4.4 Impact],
+    fireRate=11.3,
+    magazine=45,
+    multishot=0,
+    name="Dera",
+    reload=2.37,
+    status=0.1,
+    weaponType=Rifle
+    }
 dread :: Weapon
 dread = Weapon {
     accuracy=1.0,
@@ -169,6 +184,21 @@ opticor = Weapon {
     reload=2.0,
     status=0.15,
     weaponType=Rifle
+    }
+parisPrime :: Weapon
+parisPrime = Weapon {
+    accuracy=1.0,
+    capacity=72,
+    critChance=0.45,
+    critMultiplier=2.0,
+    damage=[Damage 5 Impact, Damage 160 Puncture, Damage 35 Slash],
+    fireRate=0.5,
+    magazine=1,
+    multishot=0,
+    name="Paris Prime",
+    reload=0.7,
+    status=0.20,
+    weaponType=Bow
     }
 quanta :: Weapon
 quanta = Weapon {

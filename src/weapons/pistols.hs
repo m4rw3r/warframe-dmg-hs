@@ -63,6 +63,21 @@ lexPrime = Weapon {
     status=0.20,
     weaponType=Pistol
     }
+synoidGammacor :: Weapon
+synoidGammacor = Weapon {
+    accuracy=1.0,
+    capacity=375,
+    critChance=0.1,
+    critMultiplier=2,
+    damage=[Damage 210 Magnetic],
+    fireRate=2,
+    magazine=75,
+    multishot=0,
+    name="Synoid Gammacor",
+    reload=2,
+    status=0.2,
+    weaponType=Pistol
+    }
 wraithTwinVipers :: Weapon
 wraithTwinVipers = Weapon {
     accuracy=0.111,
@@ -76,5 +91,20 @@ wraithTwinVipers = Weapon {
     name="Wraith Twin Vipers",
     reload=2.0,
     status=0.05,
+    weaponType=Pistol
+    }
+vaykorMarelok :: Weapon
+vaykorMarelok = Weapon {
+    accuracy=0.1,
+    capacity=210,
+    critChance=0.2,
+    critMultiplier=1.5,
+    damage=[Damage 48 Slash, Damage 16 Puncture, Damage 96 Impact],
+    fireRate=2,
+    magazine=10,
+    multishot=0,
+    name="Vaykor Marelok",
+    reload=1.7,
+    status=0.35,
     weaponType=Pistol
     }
