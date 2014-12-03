@@ -47,7 +47,9 @@ forceModsByNames n = case modsByNames n of
 mods :: [Mod]
 mods = [
     -- Pistols
+    Mod "Anemic Agility"    [ModType Pistol] [FireRate 0.9, AnyDamage (-0.15)],
     Mod "Barrel Diffusion"  [ModType Pistol] [Multishot 1.2],
+    Mod "Bore"              [ModType Pistol] [ElementalDamage 1.2 Puncture],
     Mod "Concussion Rounds" [ModType Pistol] [ElementalDamage 0.6 Impact],
     Mod "Convulsion"        [ModType Pistol] [ElementalDamage 0.9 Electricity],
     Mod "Deep Freeze"       [ModType Pistol] [ElementalDamage 0.6 Cold],
@@ -87,6 +89,7 @@ mods = [
     Mod "Infected Clip"     [ModType Rifle] [ElementalDamage 0.9 Toxic],
     Mod "Magazine Warp"     [ModType Rifle] [MagazineCapacity 0.3],
     Mod "Malignant Force"   [ModType Rifle] [ElementalDamage 0.6 Toxic, Status 0.6],
+    Mod "Piercing Caliber"  [ModType Rifle] [ElementalDamage 1.2 Puncture],
     Mod "Piercing Hit"      [ModType Rifle] [ElementalDamage 0.3 Puncture],
     Mod "Point Strike"      [ModType Rifle] [CritChance 1.5],
     Mod "Rifle Aptitude"    [ModType Rifle] [Status 0.15],
@@ -110,6 +113,7 @@ mods = [
     Mod "Blaze"              [ModType Shotgun] [AnyDamage 0.6, ElementalDamage 0.6 Heat],
     Mod "Blunderbuss"        [ModType Shotgun] [CritChance 0.9],
     Mod "Burdened Magazine"  [ModType Shotgun] [MagazineCapacity 0.6, ReloadSpeed (-0.18)],
+    Mod "Breach Loader"      [ModType Shotgun] [ElementalDamage 1.2 Puncture],
     Mod "Charged Shell"      [ModType Shotgun] [ElementalDamage 0.9 Electricity],
     Mod "Chilling Grasp"     [ModType Shotgun] [ElementalDamage 0.9 Cold],
     Mod "Contagious Spread"  [ModType Shotgun] [ElementalDamage 0.9 Toxic],
